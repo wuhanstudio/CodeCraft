@@ -12,6 +12,8 @@ int feasible_childnode(int **&A,int j,int arr[2][10],int num,int path[]);//找�
 int judge(int nummust,int mustarr[50],int test);//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
 int sec(time_t &G);//返回当前的秒数
 int time_used(time_t &H);//返回以用的时间
+
+
 int **a;//边的矩阵
 int edgenum;//边的条数
 int num_must;//必经点点数
@@ -23,6 +25,9 @@ int bestpath[600];//存储最好的路径
 int bestpow=-1;//最好路径的权重
 int bestnum;//最好的路径的点数
 int start_time;//开始时间
+time_t T;//计时用的结构体
+const int compare_num=20;//每个点路径信息最大存储数，用于比较
+const int max_limb = 100;//最大的子树数目
 
 typedef struct str
 {
@@ -36,24 +41,27 @@ typedef struct str
 }node;
 
 
+typedef struct infostr
+{
+	//int num;//已经存下的路径
+	int must_num[compare_num];//路径经历的必经点点数
+	//int must_node[compare_num][50];//已经经历的必经点
+	int sumpow[compare_num];//路径加总权重
+}info_node;
 
+info_node *node_info[600];
 
 /*
-typedef struct strct
+typedef struct beststr
 {
-	int shortest;
 	int num;//已经存下的路径
-	int must_num[100];//路径经历的必经点点数
-	int must_node[100][50];//已经经历的必经点
-	int sumpow[100];//路径加总权重
-}info_node;
+	int must_num[20];//路径经历的必经点点数
+	int must_node[20][50];//已经经历的必经点
+	int sumpow[20];//路径加总权重
+}best_node;
 */
+
 //info_node *memory[600];
-time_t T;
-
-
-
-
 
 
 void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num已经经历了的点的数目，path已经经历过的点 path[0]==startpoint;
@@ -79,7 +87,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 	node *r,*m,*q;
 	for(i=0;i<num_node;i++)
 	{
-		if(time_used(T)>=3)
+		if(time_used(T)>=10)
 		{
 			break;
 		}
@@ -96,7 +104,6 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 		
 		while(r)
 		{
-
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
 			//printf("bbb\n");
@@ -105,12 +112,12 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 				if(arr[0][j]==end_node)
 				{
 					//r = (node *)malloc(sizeof(node));
-					c = (node *)malloc(sizeof(node));
-					c->point=arr[0][j];
-					memcpy(c->road, r->road ,r->passnum * sizeof(int));
-					c->road[r->passnum]=arr[0][j];
-					c->passnum=r->passnum+1;
-					c->pow=r->pow+arr[1][j];
+					//c = (node *)malloc(sizeof(node));
+					r->point=arr[0][j];
+					//memcpy(c->road, r->road ,r->passnum * sizeof(int));
+					r->road[r->passnum]=arr[0][j];
+					r->passnum=r->passnum+1;
+					r->pow=r->pow+arr[1][j];
 					//memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					int estimate= (r->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
 					//estimate=judge(num_must,must_arr,r->passnum,r->road);
@@ -119,11 +126,11 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 						//符合条件的要存下来
 						//计算路径总权重
 						//int pathpow=calculate_pow(c->passnum, c->road);
-						if((bestpow==-1)||(bestpow > (c->pow)))
+						if((bestpow==-1)||(bestpow > (r->pow)))
 						{
-							bestnum = c->passnum;
-							bestpow = c->pow;
-							memcpy(bestpath, c->road ,bestnum * sizeof(int));
+							bestnum = r->passnum;
+							bestpow = r->pow;
+							memcpy(bestpath, r->road ,bestnum * sizeof(int));
 							printf("bestpow:%d path:",bestpow);
 							for(int o=0;o<bestnum;o++)
 							{
@@ -133,7 +140,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 						}
 					}
 				}
-				else if( (r->pow + arr[1][j]) < shortest[arr[0][j]] )
+				else if( ( ( r->pow + arr[1][j] ) < shortest[arr[0][j]] ) )
 				{
 					shortest[arr[0][j]] = r->pow + arr[1][j];
 					c = (node *)malloc(sizeof(node));
@@ -158,27 +165,31 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 				}
 				else
 				{
-					if((r->mustnum) > 0)
+					r->pow=r->pow+arr[1][j];
+					r->road[r->passnum]=arr[0][j];
+					r->passnum=r->passnum+1;
+					if( judge( num_must, must_arr, arr[0][j] ) == 1 )
 					{
-						c = (node *)malloc(sizeof(node));
-						if(judge(num_must,must_arr,arr[0][j])==1)
+						r->mustnode[r->mustnum]=arr[0][j];
+						r->mustnum = r->mustnum + 1;
+					}
+					for(int o=0;o<compare_num;o++)
+					{
+						if((r->mustnum > node_info[arr[0][j]]->must_num[o]) || ((r->mustnum == node_info[arr[0][j]]->must_num[o])&&(r->pow < node_info[arr[0][j]]->sumpow[o])) )
 						{
-							c->mustnum = r->mustnum + 1;
-							memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
-							c->mustnode[r->mustnum]=arr[0][j];
-						}
-						else
-						{
+							c = (node *)malloc(sizeof(node));
 							c->mustnum = r->mustnum;
 							memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+							c->point=arr[0][j];
+							c->passnum=r->passnum;
+							c->pow=r->pow;
+							memcpy(c->road, r->road ,r->passnum * sizeof(int));
+							node_info[arr[0][j]]->must_num[o] = c->mustnum;
+							node_info[arr[0][j]]->sumpow[o] = c->pow;
+							m->next=c;
+							m=c;
+							break;
 						}
-						c->point=arr[0][j];
-						c->passnum=r->passnum+1;
-						c->pow=r->pow+arr[1][j];
-						memcpy(c->road, r->road ,r->passnum * sizeof(int));
-						c->road[r->passnum]=arr[0][j];
-						m->next=c;
-						m=c;
 					}
 				}
 			}
@@ -212,11 +223,22 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	num_node=a[edge_num-1][0]+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
 	
-
+	for(i=0; i<num_node; i++)
+	{
+		node_info[i] = (info_node *)malloc(sizeof(info_node));
+		//node_info[i]->num = 0;
+		for(int j=0;j<compare_num;j++)
+		{
+			node_info[i]->must_num[j]=0;
+			node_info[i]->sumpow[j]=12000;
+		}
+	}
+	//printf("%d\n",node_info[49]->sumpow[4]);
+	
 	int PATH[num_node];
 	PATH[0]=start_node;
 
-
+	
 	creat(start_node,1,PATH);
 	
 	if(bestpow==-1)
