@@ -27,8 +27,10 @@ int bestpow=-1;//最好路径的权重
 int bestnum;//最好的路径的点数
 int start_time;//开始时间
 time_t T;//计时用的结构体
-const int compare_num=30;//每个点路径信息最大存储数，用于比较
-double rate=0.5;
+
+const int compare_num=15;//每个点路径信息最大存储数，用于比较
+double rate=0.7;
+
 double x1=500,x2=2;//x1必经点数量权重，x2路径权值和的权重
 
 typedef struct str
@@ -50,6 +52,7 @@ typedef struct infostr
 	int sumpow[compare_num];//路径加总权重
 }info_node;
 
+
 info_node *node_info[600];
 
 /*
@@ -63,7 +66,6 @@ typedef struct beststr
 */
 
 //info_node *memory[600];
-
 
 
 int calculate_score(node *&A, info_node *&B)
@@ -148,19 +150,21 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 		{
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
-			//printf("bbb\n");
+
 			for(int j=0; j < k; j++)
 			{
 				if(arr[0][j]==end_node)
 				{
+
+                    char name[50];
 					//r = (node *)malloc(sizeof(node));
-					//c = (node *)malloc(sizeof(node));
-					r->point=arr[0][j];
-					//memcpy(c->road, r->road ,r->passnum * sizeof(int));
-					r->road[r->passnum]=arr[0][j];
-					r->passnum=r->passnum+1;
-					r->pow=r->pow+arr[1][j];
-					//memcpy(c->road, r->road ,r->passnum * sizeof(int));
+					c = (node *)malloc(sizeof(node));
+					c->point=arr[0][j];
+					c->passnum=r->passnum+1;
+					c->pow=r->pow+arr[1][j];
+					memcpy(c->road, r->road ,r->passnum * sizeof(int));
+					c->road[r->passnum]=arr[0][j];
+
 					int estimate= (r->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
 					//estimate=judge(num_must,must_arr,r->passnum,r->road);
 					if(estimate==1)
@@ -168,18 +172,15 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 						//符合条件的要存下来
 						//计算路径总权重
 						//int pathpow=calculate_pow(c->passnum, c->road);
-						char name[50];
+
 						if((bestpow==-1)||(bestpow > (r->pow)))
 						{
-							bestnum = r->passnum;
-							bestpow = r->pow;
-							memcpy(bestpath, r->road ,bestnum * sizeof(int));
+							bestnum = c->passnum;
+							bestpow = c->pow;
+							memcpy(bestpath, c->road ,bestnum * sizeof(int));
 							printf("bestpow:%d path:",bestpow);
-							for(int o=0;o<bestnum;o++)
-							{
-								printf("%d->",bestpath[o]);
-							}
-                            sprintf(name,"result_%d.txt",countresult);
+							sprintf(name,"result_%d.txt",countresult);
+
 							FILE *fid=fopen(name,"w");
 					
 							for(int o=0;o<bestnum;o++)
@@ -188,13 +189,16 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 								{
 									fprintf(fid,"%d,%d\n",bestpath[o],bestpath[o+1]);
 								}
-								//printf("%d,",bestpath[o]);
+
+								printf("%d,",bestpath[o]);
 							}	
 							fclose(fid);
-							countresult++;	
-                            printf("\n");						
+                            printf("\n");
+                            countresult++;
+
 						}
 					}
+					free(c);
 				}
 				else if( ( ( r->pow + arr[1][j] ) < shortest[arr[0][j]] ) )
 				{
@@ -221,27 +225,34 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 				}
 				else
 				{
-					r->pow=r->pow+arr[1][j];
-					r->road[r->passnum]=arr[0][j];
-					r->passnum=r->passnum+1;
-					r->point = arr[0][j];
-					if( arr[2][j]== 1 )
+
+					c = (node *)malloc(sizeof(node));
+					if(arr[2][j]==1)
 					{
-						r->mustnode[r->mustnum]=arr[0][j];
-						r->mustnum = r->mustnum + 1;
+						c->mustnum = r->mustnum + 1;
+						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+						c->mustnode[r->mustnum]=arr[0][j];
 					}
-					if(calculate_score(r, node_info[arr[0][j]])==1)
+					else
 					{
-						c = (node *)malloc(sizeof(node));
 						c->mustnum = r->mustnum;
 						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
-						c->point=r->point;
-						c->passnum=r->passnum;
-						c->pow=r->pow;
-						memcpy(c->road, r->road ,r->passnum * sizeof(int));
+					}
+					c->point=arr[0][j];
+					c->passnum=r->passnum+1;
+					c->pow=r->pow+arr[1][j];
+					memcpy(c->road, r->road ,r->passnum * sizeof(int));
+					c->road[r->passnum]=arr[0][j];
+					if(calculate_score(c, node_info[arr[0][j]])==1)
+					{
 						m->next=c;
 						m=c;				
 					}
+					else
+					{
+						free(c);
+					}
+
 				}
 			}
 			r = r->next;
