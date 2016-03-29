@@ -28,9 +28,17 @@ then
 	cd bin
 	chmod +x ./future_net
 	./future_net topo.csv demand.csv result.csv
+    
+	cp ../validate ./
+    	echo --------------------------------------------
+	echo 自动查找结果路径是否可行
+	echo --------------------------------------------
+	read -p "确认开始查找?"    	
+    	./validate
 else
 	echo [错误]没有找到future_net,编译失败
 fi
 
 cd ..
 	
+
