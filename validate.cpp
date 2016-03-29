@@ -110,7 +110,7 @@ void validateDemand()
     printf("\n");
     printf("---------------------------------\n");     
     printf("开始测试是否经过所有必经点\n");    
-    printf("%s",demand);    
+    printf("%s\n",demand);    
     printf("---------------------------------\n");     
     //getchar();
     split(list, demand, ",");
@@ -146,7 +146,7 @@ void validateDemand()
             split(split_temp,result_line,",");
             int result_start = atoi(split_temp[0]);
             pp=0;
-            while(must[pp])
+            while(pp<num_must)
             {
                 if(result_start==must[pp])
                 {
