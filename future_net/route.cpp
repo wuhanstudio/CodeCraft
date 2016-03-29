@@ -227,7 +227,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 							bestnum = r->passnum;
 							bestpow = r->pow;
 							memcpy(bestpath, r->road ,bestnum * sizeof(int));
-							printf("bestpow:%d\npath:\n",bestpow);
+							printf("bestpow:%d\nbestpath:\n",bestpow);
 							sprintf(name,"result_%d.txt",countresult);
 							FILE *fid=fopen(name,"w");
 					        int o;
@@ -241,13 +241,13 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 									fprintf(fid,"%d,%d\n",bestpath[o],bestpath[o+1]);
 								//}
                             };
-                            printf("%d\n",bestpath[o]);                            
+                            printf("%d\n",bestpath[o]);
                             o=0;
-                            while(r->mustnode[o])
-							{
-                                    printf("结果经历的必经点%d:\n",r->mustnode[o]);
-                                    o++;
-							}	
+                            //while(r->mustnode[o])
+							//{
+                            //       printf("结果经历的必经点%d:\n",r->mustnode[o]);
+                            //        o++;
+							//}	
 							fclose(fid);
 							countresult++;							
 							printf("\n");
@@ -403,8 +403,10 @@ int read_demand(char *demand,int must[50],int &startnode,int &endnode)
 	char list[50][20];
 	char sel[50][20];
 	int num_must;                       //必经点点数
-    printf("%s\n",demand);
-	split(list, demand, ",");
+    //printf("--------------------\n");     
+    //printf("%s",demand);
+    //printf("--------------------\n");     	
+    split(list, demand, ",");
     
 	startnode=atoi(list[0]);            // 起点
 	endnode=atoi(list[1]);              // 终点  
