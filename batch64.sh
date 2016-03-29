@@ -1,21 +1,4 @@
 #!/bin/bash
-cd `dirname $0`
-rm -f lib/lib_io.a
-cp lib/64/lib_io.a lib/
-rm -fr bin
-mkdir bin
-cd build
-shopt -s extglob
-rm -fr !(Makefile)
-make
-cd ..
-cp -r future_net bin/code
-cd bin
-tar -zcPf future_net.tar.gz *
-cp future_net.tar.gz ../
-rm -rf code
-rm -f future_net.tar.gz
-cd ..
 
 if [ -e bin/future_net ]
 then
@@ -43,9 +26,8 @@ then
         then        
             rm *.txt
         fi
-    	read -p "确认开始测试?"
+    	#read -p "确认开始测试?"
         cd ..
-        ls
         cp ../test-case/$caseName/case$i/topo.csv  bin/
         cp ../test-case/$caseName/case$i/demand.csv bin/
 	    
@@ -62,14 +44,14 @@ then
             echo --------------------------------------------
 	        echo 自动查找结果路径是否可行
 	        echo --------------------------------------------
-	        read -p "确认开始查找?"    	
+	        #read -p "确认开始查找?"    	
             ./validate
         else
              echo ------此case无解------
         fi
              cd ..
         left=`expr 9 - $i`
-        read -p "继续下一轮测试? 还剩下$left次"   
+        #read -p "继续下一轮测试? 还剩下$left次"   
     done
         
 else
