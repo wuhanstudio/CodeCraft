@@ -164,8 +164,9 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 					c->pow=r->pow+arr[1][j];
 					memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					c->road[r->passnum]=arr[0][j];
-
-					int estimate= (r->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
+                    c->mustnum = r->mustnum;
+					//memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+					int estimate= (c->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
 					//estimate=judge(num_must,must_arr,r->passnum,r->road);
 					if(estimate==1)
 					{
@@ -301,12 +302,10 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	
 	if(bestpow==-1)
 	{
-		printf("无解\n");
+		printf("NA\n");
 	}
-
-	unsigned short result[] = { 2, 6, 5 };//示例中的一个解
-	for (int i = 0; i < 3; i++)
-		record_result(result[i]);
+	for (int i = 0; i < bestnum; i++)
+		record_result(bestpath[i]);
 }
 
 int split(char dst[][20], char* str, const char* spl)//分解字符串函数
