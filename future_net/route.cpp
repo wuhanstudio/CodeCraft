@@ -27,8 +27,10 @@ int bestpow=-1;//最好路径的权重
 int bestnum;//最好的路径的点数
 int start_time;//开始时间
 time_t T;//计时用的结构体
+
 const int compare_num=15;//每个点路径信息最大存储数，用于比较
 double rate=0.7;
+
 double x1=500,x2=2;//x1必经点数量权重，x2路径权值和的权重
 
 typedef struct str
@@ -50,6 +52,7 @@ typedef struct infostr
 	int sumpow[compare_num];//路径加总权重
 }info_node;
 
+
 info_node *node_info[600];
 
 /*
@@ -63,7 +66,6 @@ typedef struct beststr
 */
 
 //info_node *memory[600];
-
 
 
 int calculate_score(node *&A, info_node *&B)
@@ -139,7 +141,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 		r = h->next;
 		m = l;
 		
-		if(time_used(T)>=100)
+		if(time_used(T)>=1000)
 		{
 			printf("超时!最大深度%d:",r->passnum);
 			break;
@@ -148,10 +150,12 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 		{
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
+
 			for(int j=0; j < k; j++)
 			{
 				if(arr[0][j]==end_node)
 				{
+
                     char name[50];
 					//r = (node *)malloc(sizeof(node));
 					c = (node *)malloc(sizeof(node));
@@ -160,20 +164,24 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 					c->pow=r->pow+arr[1][j];
 					memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					c->road[r->passnum]=arr[0][j];
-					int estimate= (r->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
+                    c->mustnum = r->mustnum;
+					//memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+					int estimate= (c->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件		
 					//estimate=judge(num_must,must_arr,r->passnum,r->road);
 					if(estimate==1)
 					{
 						//符合条件的要存下来
 						//计算路径总权重
 						//int pathpow=calculate_pow(c->passnum, c->road);
-						if((bestpow==-1)||(bestpow > (r->pow)))
+
+						if((bestpow==-1)||(bestpow > (c->pow)))
 						{
 							bestnum = c->passnum;
 							bestpow = c->pow;
 							memcpy(bestpath, c->road ,bestnum * sizeof(int));
 							printf("bestpow:%d path:",bestpow);
 							sprintf(name,"result_%d.txt",countresult);
+
 							FILE *fid=fopen(name,"w");
 					
 							for(int o=0;o<bestnum;o++)
@@ -182,11 +190,13 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 								{
 									fprintf(fid,"%d,%d\n",bestpath[o],bestpath[o+1]);
 								}
+
 								printf("%d,",bestpath[o]);
 							}	
 							fclose(fid);
                             printf("\n");
                             countresult++;
+
 						}
 					}
 					free(c);
@@ -216,6 +226,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 				}
 				else
 				{
+
 					c = (node *)malloc(sizeof(node));
 					if(arr[2][j]==1)
 					{
@@ -242,6 +253,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 					{
 						free(c);
 					}
+
 				}
 			}
 			r = r->next;
@@ -290,12 +302,10 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	
 	if(bestpow==-1)
 	{
-		printf("无解\n");
+		printf("NA\n");
 	}
-
-	unsigned short result[] = { 2, 6, 5 };//示例中的一个解
-	for (int i = 0; i < 3; i++)
-		record_result(result[i]);
+	for (int i = 0; i < bestnum; i++)
+		record_result(bestpath[i]);
 }
 
 int split(char dst[][20], char* str, const char* spl)//分解字符串函数
