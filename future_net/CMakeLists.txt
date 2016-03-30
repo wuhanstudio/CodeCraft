@@ -1,36 +1,23 @@
-# CMake вН╣м╟Ф╠╬╨ер╙гС
-cmake_minimum_required(VERSION 3.3)
+# CMake Ф°─Д╫▌Г┴┬Ф°╛Е▐╥Х╕│Ф╠┌
+cmake_minimum_required(VERSION 2.8)
 
-# оНд©пео╒
+# И║╧Г⌡╝Д©║Ф│╞
 project(future_net)
 
-# includeб╥╬╤
+# includeХ╥╞Е╬└
 include_directories(${PROJECT_SOURCE_DIR}/lib)
 
-# иХжц©иж╢ппнд╪ЧиЗЁиб╥╬╤
+# Х╝╬Г╫╝Е▐╞Ф┴╖Х║▄Ф√┤Д╩╤Г■÷Ф┬░Х╥╞Е╬└
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin)
 
-# иЗЁиdebug╟Ф╠╬
+# Г■÷Ф┬░debugГ┴┬Ф°╛
 SET(CMAKE_BUILD_TYPE "Debug") 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
-# ╡Иур╣╠г╟д©б╪об╣дкЫспт╢нд╪Ч
-# ╡╒╫╚цШЁф╠ё╢Ф╣╫ DIR_LIB_SRCS ╠Да©
+# Ф÷╔Ф┴╬Е╫⌠Е┴█Г⌡╝Е╫∙Д╦▀Г └Ф┴─Ф°┴Ф╨░Ф√┤Д╩╤
+# Е╧╤Е╟├Е░█Г╖╟Д©²Е╜≤Е┬╟ DIR_LIB_SRCS Е▐≤И┤▐
 aux_source_directory(. DIR_SRCS)
 
-# лМ╪с lib всд©б╪
-#add_subdirectory(lib)
-
-# ж╦╤╗иЗЁид©╠Й 
+# Ф▄┤Е╝ Г■÷Ф┬░Г⌡╝Ф═┤ 
 add_executable(future_net ${DIR_SRCS})
-
-# иЗЁи╢Ьспб╥╬╤╣да╛╫с©Бё╛╢Ф╢╒сз FUTURE_NET_LIBRARY ╠Да©
-find_library(FUTURE_NET_LIBRARY _io ${PROJECT_BINARY_DIR}/../lib)
-IF (NOT FUTURE_NET_LIBRARY)
-    MESSAGE(FATAL_ERROR "FUTURE_NET_LIBRARY not found")
-ENDIF(NOT FUTURE_NET_LIBRARY)
-
-# лМ╪са╢╫с©Б
-target_link_libraries(future_net ${FUTURE_NET_LIBRARY})
-target_link_libraries(future_net pthread)
