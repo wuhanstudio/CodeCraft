@@ -173,7 +173,7 @@ void creat(int pointnum,int num,int path[])//pointnum当前点的点序号，num
 						//计算路径总权重
 						//int pathpow=calculate_pow(c->passnum, c->road);
 
-						if((bestpow==-1)||(bestpow > (r->pow)))
+						if((bestpow==-1)||(bestpow > (c->pow)))
 						{
 							bestnum = c->passnum;
 							bestpow = c->pow;
