@@ -26,9 +26,9 @@ int bestnum;//最好的路径的点数
 int start_time;//开始时间
 time_t T;//计时用的结构体
 
-const int compare_num=10;//每个点路径信息最大存储数，用于比较
-double rate=0.8;
-double x1=500,x2=4;//x1必经点数量权重，x2路径权值和的权重
+const int compare_num=3;//每个点路径信息最大存储数，用于比较
+double rate=0.9;
+double x1=500,x2=2;//x1必经点数量权重，x2路径权值和的权重
 
 typedef struct str
 {
@@ -97,9 +97,9 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 	int k;
 	int arr[3][10];
 	int i;
-	printf("num_node:%d\n",num_node);
+	//printf("num_node:%d\n",num_node);
 	int shortest[600];
-	for(i=0;i<num_node;i++)
+	for(i=num_node-1;i>=0;i--)
 	{
 		shortest[i]=12000;
 	}
@@ -159,6 +159,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 							bestpow = c->pow;
 							memcpy(bestpath, c->road ,bestnum * sizeof(int));
 							
+                            /*
 							printf("bestpow:%d path:",bestpow);
 							for(int o=0;o<bestnum;o++)
 							{
@@ -170,6 +171,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 								printf("%d|",c->mustnode[o]);
 							}
 							printf("\n");
+                            */
 						}
 					}
 					free(c);
@@ -277,8 +279,8 @@ void search_route(char *graph[5000], int edge_num, char *condition)
         {
             if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
             {
-                printf("%d,",a[j][3]);
-		      record_result(a[j][3]);
+                //printf("%d,",a[j][3]);
+		        record_result(a[j][3]);
             }
         }
     }
