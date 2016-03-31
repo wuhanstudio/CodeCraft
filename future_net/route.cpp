@@ -248,12 +248,13 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	int i;
 	for (i = edge_num-1;i>=0;i--)
 	{
-		a[i] = (int *)malloc(sizeof(int) * 3);
+		a[i] = (int *)malloc(sizeof(int) * 4);
 		char dst[5][15];
 		split(dst, graph[i], ",");
 		a[i][0] = atoi(dst[1]);
 		a[i][1] = atoi(dst[2]);
 		a[i][2] = atoi(dst[3]);
+        a[i][3] = atoi(dst[0]);
 	}
 	num_node=a[edge_num-1][0]+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
@@ -270,6 +271,18 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	
 	
 	create();
+    for (i = 0; i < bestnum-1; i++)
+    {
+        for(int j=0;j<edge_num;j++)
+        {
+            if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
+            {
+                printf("%d,",a[j][3]);
+		      record_result(a[j][3]);
+            }
+        }
+    }
+    
 	for(i=num_node-1; i>=0; i--)
 	{
 		free(node_info[i]);
@@ -279,8 +292,6 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 		free(a[i]);
 	}
 	free(a);	
-	for (int i = 0; i < bestnum; i++)
-		record_result(bestpath[i]);
 }
 
 int split(char dst[][15], char* str, const char* spl)//分解字符串函数
