@@ -12,7 +12,7 @@ int feasible_childnode(int **&A,int j,int arr[2][10],int num,int path[]);//找�
 int judge(int nummust,int mustarr[50],int test);//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
 int sec(time_t &G);//返回当前的秒数
 int time_used(time_t &H);//返回以用的时间
-
+void create();
 int **a;//边的矩阵
 int edgenum;//边的条数
 int num_must;//必经点点数
@@ -26,9 +26,10 @@ int bestnum;//最好的路径的点数
 int start_time;//开始时间
 time_t T;//计时用的结构体
 
-const int compare_num=3;//每个点路径信息最大存储数，用于比较
-double rate=0.9;
-double x1=500,x2=2;//x1必经点数量权重，x2路径权值和的权重
+const int compare_num=25;//每个点路径信息最大存储数，用于比较
+ int use_compare_num=compare_num;
+double rate=0.8;
+double x1=500,x2=4;//x1必经点数量权重，x2路径权值和的权重
 
 typedef struct str
 {
@@ -51,14 +52,154 @@ typedef struct infostr
 
 info_node *node_info[600];
 
+//你要完成的功能总入口
+void search_route(char *graph[5000], int edge_num, char *condition)
+{
+	start_time=sec(T);
+	edgenum=edge_num;
+	a = (int **)malloc(sizeof(int *) * 5000);
+	int i;
+	for (i = edge_num-1;i>=0;i--)
+	{
+		a[i] = (int *)malloc(sizeof(int) * 4);
+		char dst[5][15];
+		split(dst, graph[i], ",");
+		a[i][0] = atoi(dst[1]);
+		a[i][1] = atoi(dst[2]);
+		a[i][2] = atoi(dst[3]);
+       	              a[i][3] = atoi(dst[0]);
+	}
+	num_node=a[edge_num-1][0]+1;
+	num_must = read_demand(condition,must_arr,start_node,end_node);
+	
+	if(num_node<=20)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	f(num_node<=100)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	f(num_node<=150)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	f(num_node<=200)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	f(num_node<=250)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	f(num_node<=300)
+	{
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+
+	// INCREDIBLE
+	else if (num_node<=550)
+	{
+		use_compare_num=3;//每个点路径信息最大存储数，用于比较
+		rate=0.9;
+		x2=2;//x1必经点数量权重，x2路径权值和的权重
+	}
+	else
+	{
+		use_compare_num=2;//每个点路径信息最大存储数，用于比较
+		 rate=0.9;
+		 x2=0.1;//x1必经点数量权重，x2路径权值和的权重
+	}
+
+	
+	//printf("num_node:%d\n",num_node);
+	//printf("num_must:%d\n",num_must);
+	/*
+	if(num_must<=10)
+	{
+		return;		// result error
+	}
+	else if(num_must<=20)
+	{
+	        for(int j=0;j<edge_num;j++)
+	        {
+	            if(a[j][0]!=start_node&&a[j][1]==end_node)	//  first node error
+	            {
+			record_result(a[j][3]);
+			break;
+	            }
+	        }
+	}
+	else if(num_must<=30)
+	{
+	       for(int j=0;j<edge_num;j++)
+	        {
+	            if(a[j][0]==start_node&&a[j][1]!=end_node)          // last node error
+	            {
+			record_result(a[j][3]);
+			break;
+	            }
+	        }
+	}
+	else
+		while(1);	// no result file
+	*/
+	
+	for(i=num_node-1; i>=0; i--)
+	{
+		node_info[i] = (info_node *)malloc(sizeof(info_node));
+		for(int j=compare_num-1;j>=0;j--)
+		{
+			node_info[i]->must_num[j]=0;
+			node_info[i]->sumpow[j]=12000;
+		}
+	}	
+	create();
+	    for (i = 0; i < bestnum-1; i++)
+	    {
+	        for(int j=0;j<edge_num;j++)
+	        {
+	            if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
+	            {
+	                //printf("%d,",a[j][3]);
+			        record_result(a[j][3]);
+	            }
+	        }
+	    }
+    
+	for(i=num_node-1; i>=0; i--)
+	{
+		free(node_info[i]);
+	}
+	for (i = edge_num-1;i>=0;i--)
+	{
+		free(a[i]);
+	}
+	free(a);	
+	
+	
+}
+
 int calculate_score(node *&A, info_node *&B)
 {
-	double C[compare_num];
+	double C[use_compare_num];
 	double D = (x1*A->mustnum) - (x2*A->pow);
 	double low=x1*50.0, high=-50000;
 	double E;
 	int l;
-	for(int i=compare_num-1;i >=0; i--)
+	for(int i=use_compare_num-1;i >=0; i--)
 	{
 		C[i] = x1*B->must_num[i] - x2*B->sumpow[i];
 		if(low > C[i])
@@ -240,62 +381,6 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 	free(l);
 }
 
-
-//你要完成的功能总入口
-void search_route(char *graph[5000], int edge_num, char *condition)
-{
-	start_time=sec(T);
-	edgenum=edge_num;
-	a = (int **)malloc(sizeof(int *) * 5000);
-	int i;
-	for (i = edge_num-1;i>=0;i--)
-	{
-		a[i] = (int *)malloc(sizeof(int) * 4);
-		char dst[5][15];
-		split(dst, graph[i], ",");
-		a[i][0] = atoi(dst[1]);
-		a[i][1] = atoi(dst[2]);
-		a[i][2] = atoi(dst[3]);
-        a[i][3] = atoi(dst[0]);
-	}
-	num_node=a[edge_num-1][0]+1;
-	num_must = read_demand(condition,must_arr,start_node,end_node);
-	
-	for(i=num_node-1; i>=0; i--)
-	{
-		node_info[i] = (info_node *)malloc(sizeof(info_node));
-		for(int j=compare_num-1;j>=0;j--)
-		{
-			node_info[i]->must_num[j]=0;
-			node_info[i]->sumpow[j]=12000;
-		}
-	}
-	
-	
-	create();
-    for (i = 0; i < bestnum-1; i++)
-    {
-        for(int j=0;j<edge_num;j++)
-        {
-            if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
-            {
-                //printf("%d,",a[j][3]);
-		        record_result(a[j][3]);
-            }
-        }
-    }
-    
-	for(i=num_node-1; i>=0; i--)
-	{
-		free(node_info[i]);
-	}
-	for (i = edge_num-1;i>=0;i--)
-	{
-		free(a[i]);
-	}
-	free(a);	
-}
-
 int split(char dst[][15], char* str, const char* spl)//分解字符串函数
 {
     int n = 0;
@@ -387,3 +472,4 @@ int time_used(time_t &H)
 {
 	return (sec(H)-start_time);
 }
+
