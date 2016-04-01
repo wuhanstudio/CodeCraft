@@ -1,5 +1,6 @@
 bin/
 build/
+lib/
 testcase/
 dest09/
 future_net.tar.gz
