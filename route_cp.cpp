@@ -456,6 +456,8 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
     //getchar();
 		m->next = NULL;
 	}
+    if(i==num_node-1)
+        while(1);
 	free(h);
 	free(l);
 }
