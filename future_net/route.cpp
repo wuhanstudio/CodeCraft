@@ -486,17 +486,7 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])//找到
 			{
 				arr[0][k]=A[i][1];
 				arr[1][k]=A[i][2];
-                bool must=false;
-                for(int i=0;i < num_must;i++)
-                {
-                    if(arr[0][k]==must_arr[i])
-                    {
-                        arr[2][k] = 1;
-                        must = true;
-                    }
-                }
-                if(!must)
-                    arr[2][k] = 0;                
+                arr[2][k]=judge(num_must,must_arr,arr[0][k]);              
 				k++;
 			}
 		}
@@ -508,17 +498,17 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])//找到
 	return k;
 }
 
-// int judge(int nummust,int mustarr[50],int test)//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
-// {
-// 	for(int i=0;i < nummust;i++)
-// 	{
-// 		if(test==mustarr[i])
-// 		{
-// 			return 1;
-// 		}
-// 	}
-// 	return 0;
-// }
+int judge(int nummust,int mustarr[50],int test)//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
+{
+	for(int i=0;i < nummust;i++)
+	{
+		if(test==mustarr[i])
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
 
 // int sec(time_t &G)
 // {
