@@ -8,8 +8,8 @@
 
 //#include "time.h"
 
-int rate_count = 0;
-int ratesuc = 0;
+///int rate_count = 0;
+//int ratesuc = 0;
 
 int split(char dst[][15], char* str, const char* spl);
 int read_demand(char *demand,int must[],int &startnode,int &endnode);//demand是输入的condition，must[50]是必经节点数组，startnode返回起点序号，endnode返回终点的序号，函数返回必经点的点数
@@ -31,7 +31,7 @@ int bestnum;//最好的路径的点数
 //int start_time;//开始时间
 //time_t T;//计时用的结构体
 
-const int compare_num=25;//每个点路径信息最大存储数，用于比较
+const int compare_num=30;//每个点路径信息最大存储数，用于比较
  int use_compare_num=compare_num;
 double rate=0.8;
 double x1=500,x2=4;//x1必经点数量权重，x2路径权值和的权重
@@ -86,32 +86,32 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	else if(num_node<=100)  // 6
 	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
+		use_compare_num=30;//每个点路径信息最大存储数，用于比较
+		rate=0.7;
+		x2=2;//x1必经点数量权重，x2路径权值和的权重
 	}
 	else if(num_node<=150) // 7
 	{
-		use_compare_num=20;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=1;//x1必经点数量权重，x2路径权值和的权重
+		use_compare_num=30;//每个点路径信息最大存储数，用于比较
+		rate=0.7;
+		x2=2;//x1必经点数量权重，x2路径权值和的权重
 	}
 	else if(num_node<=200) // 8
 	{
-		use_compare_num=20;//每个点路径信息最大存储数，用于比较
+		use_compare_num=30;//每个点路径信息最大存储数，用于比较
 		rate=0.7;
 		x2=2;//x1必经点数量权重，x2路径权值和的权重
 	}
 	else if(num_node<=250) // 9
 	{
 		use_compare_num=5;//每个点路径信息最大存储数，用于比较
-		rate=0.85;
+		rate=0.9;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
 	else if(num_node<=300) // 10
 	{
 		use_compare_num=8;//每个点路径信息最大存储数，用于比较
-		rate=0.85;
+		rate=0.9;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
 
@@ -120,13 +120,13 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	{
         if(num_must>30)    // 11
         {
-            use_compare_num=2;//每个点路径信息最大存储数，用于比较
-            rate=0.9;
+            use_compare_num=3;//每个点路径信息最大存储数，用于比较
+            rate=0.95;
             x2=2;//x1必经点数量权重，x2路径权值和的权重
         }
         else  // 12-13
         {
-            use_compare_num=5;//每个点路径信息最大存储数，用于比较
+            use_compare_num=10;//每个点路径信息最大存储数，用于比较
             rate=0.6;
             x2=2;//x1必经点数量权重，x2路径权值和的权重
         }
@@ -134,8 +134,8 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	else   // 14-15
 	{
 		use_compare_num=2;//每个点路径信息最大存储数，用于比较
-		 rate=0.9;
-		 x2=0.1;//x1必经点数量权重，x2路径权值和的权重
+		 rate=0.95;
+		 x2=1;//x1必经点数量权重，x2路径权值和的权重
 	}
 
 	
@@ -233,12 +233,12 @@ int calculate_score(node *&A, info_node *&B)
     DL++;
 	if(D<low)
 	{
-        rate_count++;        		        
+        //rate_count++;        		        
         //srand((int)time(0));            
 		E = (low-D)/(high-D);
 		if(((1-E)*rand()/(RAND_MAX+1.0))>rate)
 		{
-            ratesuc++;	            
+            //ratesuc++;	            
 			return 1;
 		}
 		else
@@ -308,7 +308,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
         //getchar();
 		while(r)
 		{
-            DL=0;DxL=0;rate_count=0;ratesuc=0;
+            //DL=0;DxL=0;rate_count=0;ratesuc=0;
             //q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
 
@@ -486,7 +486,17 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])//找到
 			{
 				arr[0][k]=A[i][1];
 				arr[1][k]=A[i][2];
-				arr[2][k]=judge(num_must,must_arr,arr[0][k]);
+                bool must=false;
+                for(int i=0;i < num_must;i++)
+                {
+                    if(arr[0][k]==must_arr[i])
+                    {
+                        arr[2][k] = 1;
+                        must = true;
+                    }
+                }
+                if(!must)
+                    arr[2][k] = 0;                
 				k++;
 			}
 		}
@@ -498,17 +508,17 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])//找到
 	return k;
 }
 
-int judge(int nummust,int mustarr[50],int test)//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
-{
-	for(int i=0;i < nummust;i++)
-	{
-		if(test==mustarr[i])
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
+// int judge(int nummust,int mustarr[50],int test)//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
+// {
+// 	for(int i=0;i < nummust;i++)
+// 	{
+// 		if(test==mustarr[i])
+// 		{
+// 			return 1;
+// 		}
+// 	}
+// 	return 0;
+// }
 
 // int sec(time_t &G)
 // {
