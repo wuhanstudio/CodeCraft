@@ -68,52 +68,64 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	num_node=num_node+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
-	
-	if(num_node<=20)
+	// use_compare_num=20;//每个点路径信息最大存储数，用于比较
+	// rate=0.8;
+	// x2=4;//x1必经点数量权重，x2路径权值和的权重	
+    
+	if(num_node<=20)   //1-5
 	{
 		use_compare_num=25;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
-	else if(num_node<=100)
+	else if(num_node<=100) //6
 	{
 		use_compare_num=25;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
-	else if(num_node<=150)
+	else if(num_node<=150) //7
 	{
-		use_compare_num=30;//每个点路径信息最大存储数，用于比较
-		rate=0.7;
-		x2=2;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=200)
-	{
-		use_compare_num=30;//每个点路径信息最大存储数，用于比较
-		rate=0.7;
-		x2=2;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=250)
-	{
-		use_compare_num=6;//每个点路径信息最大存储数，用于比较
+		use_compare_num=15;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
-	else if(num_node<=300)
+	else if(num_node<=200) //8
 	{
-		use_compare_num=10;//每个点路径信息最大存储数，用于比较
+		use_compare_num=20;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	else if(num_node<=250) //9
+	{
+		use_compare_num=5;//每个点路径信息最大存储数，用于比较
+		rate=0.8;
+		x2=4;//x1必经点数量权重，x2路径权值和的权重
+	}
+	else if(num_node<=300)//10
+	{
+		use_compare_num=5;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
 
 	// INCREDIBLE
-	else if (num_node<=550)
+	else if (num_node<=550) 
 	{
-		use_compare_num=3;//每个点路径信息最大存储数，用于比较
-		rate=0.9;
-		x2=2;//x1必经点数量权重，x2路径权值和的权重
+        if(num_must>30)  //11
+        {
+            use_compare_num=10;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
+        }
+        else             // 12-13
+        {
+            use_compare_num=20;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=2;//x1必经点数量权重，x2路径权值和的权重
+        }
 	}
-	else
+	else                   // 14-15
 	{
 		use_compare_num=3;//每个点路径信息最大存储数，用于比较
 		 rate=0.9;
