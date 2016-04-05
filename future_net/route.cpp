@@ -68,9 +68,9 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	num_node=num_node+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
-	// use_compare_num=20;//每个点路径信息最大存储数，用于比较
+	// use_compare_num=25;//每个点路径信息最大存储数，用于比较
 	// rate=0.8;
-	// x2=4;//x1必经点数量权重，x2路径权值和的权重	
+	// x2=1;//x1必经点数量权重，x2路径权值和的权重	
     
 	if(num_node<=20)   //1-5
 	{
@@ -98,9 +98,9 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	else if(num_node<=250) //9
 	{
-		use_compare_num=5;//每个点路径信息最大存储数，用于比较
+		use_compare_num=25;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
+		x2=20;//x1必经点数量权重，x2路径权值和的权重
 	}
 	else if(num_node<=300)//10
 	{
@@ -120,16 +120,16 @@ void search_route(char *graph[5000], int edge_num, char *condition)
         }
         else             // 12-13
         {
-            use_compare_num=20;//每个点路径信息最大存储数，用于比较
+            use_compare_num=25;//每个点路径信息最大存储数，用于比较
             rate=0.8;
-            x2=2;//x1必经点数量权重，x2路径权值和的权重
+            x2=30;//x1必经点数量权重，x2路径权值和的权重
         }
 	}
 	else                   // 14-15
 	{
 		use_compare_num=3;//每个点路径信息最大存储数，用于比较
 		 rate=0.9;
-		 x2=0.1;//x1必经点数量权重，x2路径权值和的权重
+		 x2=200;//x1必经点数量权重，x2路径权值和的权重
 	}
 
 	for(i=num_node-1; i>=0; i--)
