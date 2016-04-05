@@ -190,7 +190,50 @@ int calculate_score(node *&A, info_node *&B)
 	if(D<low)
 	{
 		E = (low-D)/(high-D);
-		if(((1-E)*rand()/(RAND_MAX+1.0))>rate)
+        int bonouns=1;
+       	if(num_node<=20)   //1-5
+        {
+                bonouns = 1;
+        }
+        else if(num_node<=100) //6
+        {
+                bonouns = 7;
+        }
+        else if(num_node<=150) //7
+        {
+                bonouns = 11;
+        }
+        else if(num_node<=200) //8
+        {
+                bonouns = 4;
+        }
+        else if(num_node<=250) //9
+        {
+                bonouns = 3;
+        }
+        else if(num_node<=300)//10
+        {
+                bonouns = 2;
+        }
+
+        // INCREDIBLE
+        else if (num_node<=550) 
+        {
+            if(num_must>30)  //11
+            {
+                bonouns = 1;
+            }
+            else             // 12-13
+            {
+                bonouns = 2;
+            }
+        }
+        else                   // 14-15
+        {
+            bonouns = 15;
+        }
+        double score = (1-E)*bonouns*rand()/(RAND_MAX+1.0);
+		if(score>rate)
 		{
 			return 1;
 		}
@@ -319,7 +362,12 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 					c->pow=r->pow+arr[1][j];
 					memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					c->road[r->passnum]=arr[0][j];
-					if(calculate_score(c, node_info[arr[0][j]])==1)
+					if(arr[2][j]==1)
+                    {
+                        m->next=c;
+						m=c;	
+                    }                    
+					else if(calculate_score(c, node_info[arr[0][j]])==1)
 					{
 						m->next=c;
 						m=c;				
