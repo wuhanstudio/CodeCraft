@@ -68,9 +68,9 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	num_node=num_node+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
-	// use_compare_num=25;//每个点路径信息最大存储数，用于比较
+	// use_compare_num=20;//每个点路径信息最大存储数，用于比较
 	// rate=0.8;
-	// x2=1;//x1必经点数量权重，x2路径权值和的权重	
+	// x2=4;//x1必经点数量权重，x2路径权值和的权重	
     
 	if(num_node<=20)   //1-5
 	{
@@ -98,7 +98,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	else if(num_node<=250) //9
 	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
+		use_compare_num=23;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=20;//x1必经点数量权重，x2路径权值和的权重
 	}
@@ -127,9 +127,9 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	else                   // 14-15
 	{
-		use_compare_num=3;//每个点路径信息最大存储数，用于比较
+		use_compare_num=30;//每个点路径信息最大存储数，用于比较
 		 rate=0.9;
-		 x2=200;//x1必经点数量权重，x2路径权值和的权重
+		 x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
 
 	for(i=num_node-1; i>=0; i--)
@@ -190,7 +190,61 @@ int calculate_score(node *&A, info_node *&B)
 	if(D<low)
 	{
 		E = (low-D)/(high-D);
-		if(((1-E)*rand()/(RAND_MAX+1.0))>rate)
+        int bonouns=1;
+        double add = 0.0;
+       	if(num_node<=20)   //1-5
+        {
+                bonouns = 1;
+                add = 0;
+        }
+        else if(num_node<=100) //6
+        {
+                bonouns = 7;
+                add = -0.1;                
+        }
+        else if(num_node<=150) //7
+        {
+                bonouns = 11;
+                add = 0;
+        }
+        else if(num_node<=200) //8
+        {
+                bonouns = 4;
+                add = 0.0;
+        }
+        else if(num_node<=250) //9
+        {
+                bonouns = 3;
+                add = 0.0;
+        }
+        else if(num_node<=300)//10
+        {
+                bonouns = 2;
+                add = -0.5;
+        }
+
+        // INCREDIBLE
+        else if (num_node<=550) 
+        {
+            if(num_must>30)  //11
+            {
+                bonouns = 1;
+                add = 0;
+            }
+            else             // 12-13
+            {
+                bonouns = 2;
+                add = -0.05;
+            }
+        }
+        else                   // 14-15
+        {
+            bonouns = 5;
+            x1=1;            
+            add = 0.0;
+        }
+        double score = (1-E)*(bonouns+add)*rand()/(RAND_MAX+1.0);
+		if(score>rate)
 		{
 			return 1;
 		}
@@ -319,7 +373,12 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 					c->pow=r->pow+arr[1][j];
 					memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					c->road[r->passnum]=arr[0][j];
-					if(calculate_score(c, node_info[arr[0][j]])==1)
+					if(arr[2][j]==1)
+                    {
+                        m->next=c;
+						m=c;	
+                    }                    
+					else if(calculate_score(c, node_info[arr[0][j]])==1)
 					{
 						m->next=c;
 						m=c;				
