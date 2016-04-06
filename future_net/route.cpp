@@ -142,6 +142,8 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 		}
 	}	
 	create();
+    if(bestpow>-1)
+    {
 	    for (i = 0; i < bestnum-1; i++)
 	    {
 	        for(int j=0;j<edge_num;j++)
@@ -152,6 +154,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	            }
 	        }
 	    }
+    }
     
 	for(i=num_node-1; i>=0; i--)
 	{
@@ -234,7 +237,7 @@ int calculate_score(node *&A, info_node *&B)
             else             // 12-13
             {
                 bonouns = 2;
-                add = -0.05;
+                add = 0;
             }
         }
         else                   // 14-15
@@ -263,6 +266,7 @@ int calculate_score(node *&A, info_node *&B)
 
 void create()//pointnum当前点的点序号，num已经经历了的点的数目，path已经经历过的点 path[0]==startpoint;
 {
+    bool happy = false;
 	int k;
 	int arr[3][10];
 	int i;
@@ -283,6 +287,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 	node *r,*m,*q;
 	for(i=0;i<num_node;i++)
 	{
+        if(happy) break;
 		if(i==0)
 		{
 			l->next=c;
@@ -295,11 +300,13 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 		m = l;
 		while(r)
 		{
+            if(happy) break;            
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
 
 			for(int j=0; j < k; j++)
 			{
+                if(happy) break;                
 				if(arr[0][j]==end_node)
 				{
 					c = (node *)malloc(sizeof(node));
@@ -318,7 +325,21 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 							bestnum = c->passnum;
 							bestpow = c->pow;
 							memcpy(bestpath, c->road ,bestnum * sizeof(int));
-							
+                            if(num_node>550)
+                            {
+                                for (i = 0; i < bestnum-1; i++)
+                                {
+                                    for(int j=0;j<edgenum;j++)
+                                    {
+                                        if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
+                                        {
+                                            record_result(a[j][3]);
+                                        }
+                                    }
+                                }
+                                happy = true;
+                                break;
+                            }
                             
 							// printf("bestpow:%d path:",bestpow);
 							// for(int o=0;o<bestnum;o++)
