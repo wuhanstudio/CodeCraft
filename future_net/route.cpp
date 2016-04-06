@@ -127,7 +127,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	else                   // 14-15
 	{
-		use_compare_num=30;//每个点路径信息最大存储数，用于比较
+		use_compare_num=27;//每个点路径信息最大存储数，用于比较
 		 rate=0.9;
 		 x2=4;//x1必经点数量权重，x2路径权值和的权重
 	}
@@ -207,8 +207,8 @@ int calculate_score(node *&A, info_node *&B)
         }
         else if(num_node<=150) //7
         {
-                bonouns = 11;
-                add = 0;
+                bonouns = 10;
+                add = -0.5;
         }
         else if(num_node<=200) //8
         {
@@ -232,7 +232,7 @@ int calculate_score(node *&A, info_node *&B)
             if(num_must>30)  //11
             {
                 bonouns = 1;
-                add = 0;
+                add = -0.1;
             }
             else             // 12-13
             {
