@@ -89,6 +89,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 		use_compare_num=15;//每个点路径信息最大存储数，用于比较
 		rate=0.8;
 		x2=4;//x1必经点数量权重，x2路径权值和的权重
+        x1=300;
 	}
 	else if(num_node<=200) //8
 	{
