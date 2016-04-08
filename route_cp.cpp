@@ -25,8 +25,8 @@ int bestnum;//最好的路径的点数
 bool happy = false;
 const int compare_num=30;//每个点路径信息最大存储数，用于比较
  int use_compare_num=compare_num;
-double rate=0.8;
-double x1=500,x2=4;//x1必经点数量权重，x2路径权值和的权重
+double rate=0.3;
+double x1=10,x2=-4;//x1必经点数量权重，x2路径权值和的权重
 
 typedef struct str
 {
@@ -68,78 +68,81 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	num_node=num_node+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
+        
 	// use_compare_num=20;//每个点路径信息最大存储数，用于比较
 	// rate=0.8;
 	// x2=4;//x1必经点数量权重，x2路径权值和的权重	
     
-	if(num_node<=20)   //1-5
-	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=100) //6
-	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=150) //7
-	{
-		use_compare_num=15;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=200) //8
-	{
-		use_compare_num=18;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=250) //9
-	{
-		use_compare_num=23;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=20;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=300)//10
-	{
-		use_compare_num=5;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
+	// if(num_node<=20)   //1-5
+	// {
+	// 	use_compare_num=25;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=4;//x1必经点数量权重，x2路径权值和的权重
+	// }
+	// else if(num_node<=100) //6
+	// {
+	// 	use_compare_num=25;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=4;//x1必经点数量权重，x2路径权值和的权重
+	// }
+	// else if(num_node<=150) //7
+	// {
+	// 	use_compare_num=15;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=4;//x1必经点数量权重，x2路径权值和的权重
+	// }
+	// else if(num_node<=200) //8
+	// {
+	// 	use_compare_num=18;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=4;//x1必经点数量权重，x2路径权值和的权重
+	// }
+	// else if(num_node<=250) //9
+	// {
+	// 	use_compare_num=23;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=20;//x1必经点数量权重，x2路径权值和的权重
+	// }
+	// else if(num_node<=300)//10
+	// {
+	// 	use_compare_num=5;//每个点路径信息最大存储数，用于比较
+	// 	rate=0.8;
+	// 	x2=4;//x1必经点数量权重，x2路径权值和的权重
+	// }
 
-	// INCREDIBLE
-	else if (num_node<=550) 
-	{
-        if(num_must>30)  //11
-        {
-            use_compare_num=10;//每个点路径信息最大存储数，用于比较
-            rate=0.8;
-            x2=4;//x1必经点数量权重，x2路径权值和的权重
-        }
-        else             // 12-13
-        {
-            use_compare_num=25;//每个点路径信息最大存储数，用于比较
-            rate=0.8;
-            x2=30;//x1必经点数量权重，x2路径权值和的权重
-        }
-	}
-	else                   
-	{
+	// // INCREDIBLE
+	// else if (num_node<=550) 
+	// {
+    //     if(num_must>30)  //11
+    //     {
+    //         use_compare_num=10;//每个点路径信息最大存储数，用于比较
+    //         rate=0.8;
+    //         x2=4;//x1必经点数量权重，x2路径权值和的权重
+    //     }
+    //     else             // 12-13
+    //     {
+    //         use_compare_num=25;//每个点路径信息最大存储数，用于比较
+    //         rate=0.8;
+    //         x2=30;//x1必经点数量权重，x2路径权值和的权重
+    //     }
+	// }
+	// else                   
+	// {
+    if(num_node>550)
+    {
         if(num_must>20)  // 14
         {
-            use_compare_num=5;//每个点路径信息最大存储数，用于比较
+            use_compare_num=3;//每个点路径信息最大存储数，用于比较
 		    rate=0.8;
-            x1 = 1;
-            x2 = 1;
+            x1 = 10;
+            x2 = -1;
         }
         else             // 15
         {
-            use_compare_num=20;//每个点路径信息最大存储数，用于比较
+            use_compare_num=3;//每个点路径信息最大存储数，用于比较
             rate=0.8;
-            x1 = 1;
-            x2 = 1;
+            x1 = 10;
+            x2 = -1;
         }
 	}
 
@@ -153,6 +156,8 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 		}
 	}	
 	create();
+    if(bestpow>-1&& !happy)
+    {
 	    for (i = 0; i < bestnum-1; i++)
 	    {
 	        for(int j=0;j<edge_num;j++)
@@ -163,7 +168,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	            }
 	        }
 	    }
-    
+    }
 	for(i=num_node-1; i>=0; i--)
 	{
 		free(node_info[i]);
@@ -180,40 +185,73 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 int countr = 0;
 int calculate_score(node *&A, info_node *&B)
 {
-    if(num_node>550)
+    if(num_node>550 &&  num_must>20)  // 14
     {
-        if(num_must>20)  // 14
+        if(A->passnum<12)
+            return 1;
+        else if(A->passnum==12)
         {
-           if(A->passnum>12)   // 必经点数过少            
-           {
-               if(A->mustnum>2) // 必经点多的全部剔除
-                    return 0;
-               else
-                    return 1;
-            }
-            else 
-            {
-                //countr++;
-               return 1;
-            }
+            if(A->mustnum<=1)
+                return 0;
+            else
+                return 1;
         }
-        else             // 15
+        else if(A->passnum==13)
         {
-            // double score = (double)(A->mustnum) / (A->passnum);
-            if(A->passnum>14)   
-            { 
-               if(A->mustnum<5)  // 必经点少的全部剔除
-                    return 0;
-               else
-                    return 1;
-            }
-            else 
-            {
-                //countr++;
-               return 1;
-            }
+            return 1;
         }
+        else 
+            return 0;
     }
+    else if(num_node>550)     // 15
+    {
+        if(A->passnum<14)
+            return 1;
+        else if(A->passnum==14)
+        {
+            if(A->mustnum <=1)
+                return 0;
+            else
+                return 1;
+        }
+        else if(A->passnum==15)
+        {
+            return 1;
+        }
+        else 
+            return 0;
+    }
+        // if(num_must>20)  // 14
+        // {
+        //    if(A->passnum>12)   // 必经点数过少            
+        //    {
+        //        if(A->mustnum>=0) // 必经点多的全部剔除
+        //             return 0;
+        //        else
+        //             return 1;
+        //     }
+        //     else 
+        //     {
+        //         //countr++;
+        //        return 1;
+        //     }
+        // }
+        // else             // 15
+        // {
+        //     // double score = (double)(A->mustnum) / (A->passnum);
+        //     if(A->passnum>14)   
+        //     { 
+        //        if(A->mustnum<5)  // 必经点少的全部剔除
+        //             return 0;
+        //        else
+        //             return 1;
+        //     }
+        //     else 
+        //     {
+        //         //countr++;
+        //        return 1;
+        //     }
+        // }
     else
     {
         double C[use_compare_num];
@@ -247,8 +285,8 @@ int calculate_score(node *&A, info_node *&B)
             }
             else if(num_node<=100) //6
             {
-                    bonouns = 7;
-                    add = -0.1;                
+                    bonouns = 8;
+                    add = 0;                
             }
             else if(num_node<=150) //7
             {
@@ -272,7 +310,7 @@ int calculate_score(node *&A, info_node *&B)
             }
 
             // INCREDIBLE
-            else 
+            else if(num_node<=550)
             {
                 if(num_must>30)  //11
                 {
@@ -284,6 +322,11 @@ int calculate_score(node *&A, info_node *&B)
                     bonouns = 2;
                     add = 0;
                 }
+            }
+            else
+            {
+                bonouns = 1;
+                add = 0;
             }
             //计算得分
             double score = 0;
@@ -329,6 +372,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 	node *r,*m,*q;
 	for(i=0;i<num_node;i++)
 	{
+        if (happy == true) break;
 		if(i==0)
 		{
 			l->next=c;
@@ -341,11 +385,13 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 		m = l;
 		while(r)
 		{
+            if (happy == true) break;            
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
 
 			for(int j=0; j < k; j++)
 			{
+                if (happy == true) break;                            
 				if(arr[0][j]==end_node)
 				{
 					c = (node *)malloc(sizeof(node));
@@ -356,7 +402,7 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 					c->road[r->passnum]=arr[0][j];
                     c->mustnum = r->mustnum;
 					int estimate= (c->mustnum==num_must) ? 1 : 0;//判断路径是否符合条件
-					if(estimate==1)
+					if(estimate==1||(num_node>550 && (num_must-c->mustnum<=0)))
 					{
 
 						if((bestpow==-1)||(bestpow > (c->pow)))
@@ -435,12 +481,13 @@ void create()//pointnum当前点的点序号，num已经经历了的点的数目
 					c->pow=r->pow+arr[1][j];
 					memcpy(c->road, r->road ,r->passnum * sizeof(int));
 					c->road[r->passnum]=arr[0][j];
-					// if(arr[2][j]==1)
-                    // {
-                    //     m->next=c;
-					// 	m=c;	
-                    // }                    
-					// else 
+
+					 if(num_node>550 && arr[2][j]==1)
+                     {
+                         m->next=c;
+					 	 m=c;	
+                     }                    
+					 else 
                     if(calculate_score(c, node_info[arr[0][j]])==1)
 					{
                         //printf("保留点数:%d\n",countr); 
