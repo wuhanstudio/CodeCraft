@@ -55,17 +55,26 @@ typedef struct infostr
 
 
 info_node *node_info[600];
-typedef struct strr
-{
-	int num;//可行边条数
-	int arr_edge[9]; //arr_edge[0]存边序号
-}edge;
-edge *s2e[600];
 
 //你要完成的功能总入口
 void search_route(char *graph[5000], int edge_num, char *condition)
 {
-    if(edge_num>550)
+    edgenum=edge_num;
+    a = (int **)malloc(sizeof(int *) * 5000);
+    num_node = 0;
+    for (int i = edge_num-1;i>=0;i--)
+    {
+        a[i] = (int *)malloc(sizeof(int) * 4);
+        char dst[5][15];
+        split(dst, graph[i], ",");
+        a[i][0] = atoi(dst[1]);
+        a[i][1] = atoi(dst[2]);
+        a[i][2] = atoi(dst[3]);
+        a[i][3] = atoi(dst[0]);
+        num_node = a[i][1]> num_node?a[i][1]:num_node;
+    }
+    num_node=num_node+1;
+    if(num_node>550)
     {
         //printf("蚂蚁算法\n");
 		/*----------建立邻接链表------*/
@@ -150,37 +159,11 @@ void search_route(char *graph[5000], int edge_num, char *condition)
     }
     else
     {
-        edgenum=edge_num;
-        a = (int **)malloc(sizeof(int *) * 5000);
-        int i;
-        num_node = 0;
-        for (i = edge_num-1;i>=0;i--)
-        {
-            a[i] = (int *)malloc(sizeof(int) * 4);
-            char dst[5][15];
-            split(dst, graph[i], ",");
-            a[i][0] = atoi(dst[1]);
-            a[i][1] = atoi(dst[2]);
-            a[i][2] = atoi(dst[3]);
-            a[i][3] = atoi(dst[0]);
-            num_node = a[i][1]> num_node?a[i][1]:num_node;
-        }
-        num_node=num_node+1;
         num_must = read_demand(condition,must_arr,start_node,end_node);
         // use_compare_num=20;//每个点路径信息最大存储数，用于比较
         // rate=0.8;
         // x2=4;//x1必经点数量权重，x2路径权值和的权重	
-        for(i=num_node-1;i>=0;i--)
-        {
-            s2e[i]=(edge *)malloc(sizeof(edge));
-            s2e[i]->num=0;
-        }
-        for (i = edge_num-1;i>=0;i--)
-        {
-            s2e[a[i][1]]->arr_edge[s2e[a[i][1]]->num]=i;
-            s2e[a[i][1]]->num++;
-            
-        }
+        
         if(num_node<=20)   //1-5
         {
             use_compare_num=25;//每个点路径信息最大存储数，用于比较
@@ -236,7 +219,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
             }
         }
 
-        for(i=num_node-1; i>=0; i--)
+        for(int i=num_node-1; i>=0; i--)
         {
             node_info[i] = (info_node *)malloc(sizeof(info_node));
             for(int j=compare_num-1;j>=0;j--)
@@ -248,7 +231,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
         create();
         if(bestpow>-1)
         {
-            for (i = 0; i < bestnum-1; i++)
+            for (int i = 0; i < bestnum-1; i++)
             {
                 for(int j=0;j<edge_num;j++)
                 {
@@ -260,11 +243,11 @@ void search_route(char *graph[5000], int edge_num, char *condition)
             }
         }
         
-        for(i=num_node-1; i>=0; i--)
+        for(int  i=num_node-1; i>=0; i--)
         {
             free(node_info[i]);
         }
-        for (i = edge_num-1;i>=0;i--)
+        for (int i = edge_num-1;i>=0;i--)
         {
             free(a[i]);
         }
@@ -558,26 +541,26 @@ int read_demand(char *demand,int must[50],int &startnode,int &endnode)
 	return num_must;
 }
 
-int feasible_childnode(int **&A,int begin,int arr[3][10],int num,int path[])//找到第i个节点的可行子节点 ,A是二维路径权重矩阵，i是父节点序号，arr[0][10]存储子节点的序号,arr[1][10]存储对应子节点的权重，k存储可行子节点数目，path是已走过的路径，num是已走过路径的点数
+int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])//找到第i个节点的可行子节点 ,A是二维路径权重矩阵，i是父节点序号，arr[0][10]存储子节点的序号,arr[1][10]存储对应子节点的权重，k存储可行子节点数目，path是已走过的路径，num是已走过路径的点数
 {
 	int k=0;//可行子节点
-	for(int i=0;i<s2e[begin]->num;i++)
+	for(int i=0;i<edgenum;i++)
 	{
-		bool passed=false;
-		for(int n=num-1;n>=0;n--)
+		if(j==A[i][0])
 		{
-			if(A[s2e[begin]->arr_edge[i]][1] == path[n])
-            {
-                   passed = true;
-                   break;
-            }
-		}
-		if(!passed)
-		{
-			arr[0][k]=A[s2e[begin]->arr_edge[i]][1];
-			arr[1][k]=A[s2e[begin]->arr_edge[i]][2];
-			arr[2][k]=judge(num_must,must_arr,arr[0][k]);
-			k++;
+			bool passed=false;
+			for(int n=num-1;n>=0;n--)
+			{
+				if(A[i][1] == path[n])
+				    passed = true;
+			}
+			if(!passed)
+			{
+				arr[0][k]=A[i][1];
+				arr[1][k]=A[i][2];
+				arr[2][k]=judge(num_must,must_arr,arr[0][k]);
+				k++;
+			}
 		}
 	}
 	return k;
