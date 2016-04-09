@@ -7,12 +7,14 @@ int main(int argc, char *argv[])
 {
     print_time("Begin");
     char *topo[5000];
+    char *graph[5000];
     int edge_num;
     char *demand;
     int demand_num;
 
     char *topo_file = argv[1];
     edge_num = read_file(topo, 5000, topo_file);
+    edge_num = read_file(graph, 5000, topo_file);
     if (edge_num == 0)
     {
         printf("Please input valid topo file.\n");
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    search_route(topo, edge_num, demand);
+    search_route(topo, graph,edge_num, demand);
 
     char *result_file = argv[3];
     write_result(result_file);
