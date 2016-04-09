@@ -4,6 +4,14 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h> 
+#include<vector>
+#include<list>
+#include <queue>
+#include <algorithm>
+#include <time.h>
+#include <sys/timeb.h>
+#include <math.h>
+#include "ant_search.h"
 
 int split(char dst[][15], char* str, const char* spl);
 int read_demand(char *demand,int must[],int &startnode,int &endnode);//demand是输入的condition，must[50]是必经节点数组，startnode返回起点序号，endnode返回终点的序号，函数返回必经点的点数
@@ -51,123 +59,202 @@ info_node *node_info[600];
 //你要完成的功能总入口
 void search_route(char *graph[5000], int edge_num, char *condition)
 {
-	edgenum=edge_num;
-	a = (int **)malloc(sizeof(int *) * 5000);
-	int i;
-    num_node = 0;
-	for (i = edge_num-1;i>=0;i--)
-	{
-		a[i] = (int *)malloc(sizeof(int) * 4);
-		char dst[5][15];
-		split(dst, graph[i], ",");
-		a[i][0] = atoi(dst[1]);
-		a[i][1] = atoi(dst[2]);
-		a[i][2] = atoi(dst[3]);
-       	a[i][3] = atoi(dst[0]);
-        num_node = a[i][1]> num_node?a[i][1]:num_node;
-	}
-	num_node=num_node+1;
-	num_must = read_demand(condition,must_arr,start_node,end_node);
-	// use_compare_num=20;//每个点路径信息最大存储数，用于比较
-	// rate=0.8;
-	// x2=4;//x1必经点数量权重，x2路径权值和的权重	
-    
-	if(num_node<=20)   //1-5
-	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=100) //6
-	{
-		use_compare_num=25;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=150) //7
-	{
-		use_compare_num=15;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-        x1=300;
-	}
-	else if(num_node<=200) //8
-	{
-		use_compare_num=20;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=250) //9
-	{
-		use_compare_num=23;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=20;//x1必经点数量权重，x2路径权值和的权重
-	}
-	else if(num_node<=300)//10
-	{
-		use_compare_num=5;//每个点路径信息最大存储数，用于比较
-		rate=0.8;
-		x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
+    if(edge_num>550)
+    {
+        //printf("蚂蚁算法\n");
+		/*----------建立邻接链表------*/
+        int num_node = 0;
+        std::vector<adjlist> adj_vec = build_adjlist(graph, edge_num, &num_node);
 
-	// INCREDIBLE
-	else if (num_node<=550) 
-	{
-        if(num_must>30)  //11
+        /*----------分析需求点集------*/
+        std::vector<int> deman_vec = analysis_demand(condition,&st, &en);
+
+        /*--------------预处理---------*/
+        std::vector<int> TubaVec;
+        demanNoTuba(adj_vec, deman_vec, TubaVec, num_node);
+        pre_process(&adj_vec, num_node, TubaVec);
+
+        for (int i = 0; i < num_node; i++)
         {
-            use_compare_num=10;//每个点路径信息最大存储数，用于比较
-            rate=0.8;
-            x2=4;//x1必经点数量权重，x2路径权值和的权重
+            if (adj_vec[i].size() == 0)
+            {
+                std::vector<int>::iterator it = find(deman_vec.begin(), deman_vec.end(), i);
+                if (it != deman_vec.end())
+                {
+                    //printf("NA\n");
+                    return;
+                }
+            }
         }
-        else             // 12-13
+        path best_path;
+        if (num_node < ThresholdNode)
+        {
+            /*方式一-----------回溯寻路---------*/
+            best_path = find_path(st, en, deman_vec, adj_vec);
+            if (best_path.cost == DB_MAX)
+            {
+                //printf("NA\n");
+                return;
+            }
+        }
+        else
+        {
+            /*方式二-----------蚁群寻路---------*/
+            double **g_Trial; //两两城市间信息素，就是环境信息素
+            g_Trial = (double **)malloc(sizeof(double *)*num_node);
+            for (int i = 0; i<num_node; i++)
+                g_Trial[i] = (double *)malloc(sizeof(double) * num_node);
+
+            double **g_Distance; //两两城市间距离
+            g_Distance = (double **)malloc(sizeof(double *)*num_node);
+            for (int i = 0; i<num_node; i++)
+                g_Distance[i] = (double *)malloc(sizeof(double) * num_node);
+
+
+            CTsp tsp;
+            tsp.InitData(num_node, adj_vec, g_Distance, g_Trial); //初始化
+            tsp.Search(deman_vec, adj_vec, g_Distance, g_Trial); //开始搜索
+            //输出路径结果，以顶点名表示
+            //printf("\nThe start point is: %d , The end point is: %d\n\n", st, en);
+            if (tsp.m_cBestAnt.m_dbPathLength == DB_MAX)
+            {
+                //printf("NA\n");
+                return;
+            }
+
+            //printf("Vertex represents the best path:  ");
+            //for (int i = 0; i<tsp.m_cBestAnt.m_nMovedCityCount - 1; i++)
+                //printf("%d-> ", tsp.m_cBestAnt.m_nPath[i]);
+            //printf("%d ", tsp.m_cBestAnt.m_nPath[tsp.m_cBestAnt.m_nMovedCityCount - 1]);
+
+            best_path = NodenoIndexPath(adj_vec, tsp.m_cBestAnt);
+                    /*----------将结果写入文件-------------*/
+            for (int i = 0; i < best_path.edg_name.size(); i++)
+                record_result(best_path.edg_name[i]);
+
+            /*----------输出路径结果，以边名表示-------------*/
+            //printf("\nEdge represents the best path:  ");
+            //for (int j = 0; j < best_path.edg_name.size(); j++)
+            //{
+                //printf("%d|", best_path.edg_name[j]);
+            //}
+            //printf("\nCost=%lf,\n\n", best_path.cost);
+
+        }
+    }
+    else
+    {
+        edgenum=edge_num;
+        a = (int **)malloc(sizeof(int *) * 5000);
+        int i;
+        num_node = 0;
+        for (i = edge_num-1;i>=0;i--)
+        {
+            a[i] = (int *)malloc(sizeof(int) * 4);
+            char dst[5][15];
+            split(dst, graph[i], ",");
+            a[i][0] = atoi(dst[1]);
+            a[i][1] = atoi(dst[2]);
+            a[i][2] = atoi(dst[3]);
+            a[i][3] = atoi(dst[0]);
+            num_node = a[i][1]> num_node?a[i][1]:num_node;
+        }
+        num_node=num_node+1;
+        num_must = read_demand(condition,must_arr,start_node,end_node);
+        // use_compare_num=20;//每个点路径信息最大存储数，用于比较
+        // rate=0.8;
+        // x2=4;//x1必经点数量权重，x2路径权值和的权重	
+        
+        if(num_node<=20)   //1-5
         {
             use_compare_num=25;//每个点路径信息最大存储数，用于比较
             rate=0.8;
-            x2=30;//x1必经点数量权重，x2路径权值和的权重
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
         }
-	}
-	else                   // 14-15
-	{
-		use_compare_num=27;//每个点路径信息最大存储数，用于比较
-		 rate=0.9;
-		 x2=4;//x1必经点数量权重，x2路径权值和的权重
-	}
+        else if(num_node<=100) //6
+        {
+            use_compare_num=25;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
+        }
+        else if(num_node<=150) //7
+        {
+            use_compare_num=15;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
+            x1=300;
+        }
+        else if(num_node<=200) //8
+        {
+            use_compare_num=20;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
+        }
+        else if(num_node<=250) //9
+        {
+            use_compare_num=23;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=20;//x1必经点数量权重，x2路径权值和的权重
+        }
+        else if(num_node<=300)//10
+        {
+            use_compare_num=5;//每个点路径信息最大存储数，用于比较
+            rate=0.8;
+            x2=4;//x1必经点数量权重，x2路径权值和的权重
+        }
 
-	for(i=num_node-1; i>=0; i--)
-	{
-		node_info[i] = (info_node *)malloc(sizeof(info_node));
-		for(int j=compare_num-1;j>=0;j--)
-		{
-			node_info[i]->must_num[j]=0;
-			node_info[i]->sumpow[j]=12000;
-		}
-	}	
-	create();
-    if(bestpow>-1)
-    {
-	    for (i = 0; i < bestnum-1; i++)
-	    {
-	        for(int j=0;j<edge_num;j++)
-	        {
-	            if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
-	            {
-			        record_result(a[j][3]);
-	            }
-	        }
-	    }
+        // INCREDIBLE
+        else if (num_node<=550) 
+        {
+            if(num_must>30)  //11
+            {
+                use_compare_num=10;//每个点路径信息最大存储数，用于比较
+                rate=0.8;
+                x2=4;//x1必经点数量权重，x2路径权值和的权重
+            }
+            else             // 12-13
+            {
+                use_compare_num=25;//每个点路径信息最大存储数，用于比较
+                rate=0.8;
+                x2=30;//x1必经点数量权重，x2路径权值和的权重
+            }
+        }
+
+        for(i=num_node-1; i>=0; i--)
+        {
+            node_info[i] = (info_node *)malloc(sizeof(info_node));
+            for(int j=compare_num-1;j>=0;j--)
+            {
+                node_info[i]->must_num[j]=0;
+                node_info[i]->sumpow[j]=12000;
+            }
+        }	
+        create();
+        if(bestpow>-1)
+        {
+            for (i = 0; i < bestnum-1; i++)
+            {
+                for(int j=0;j<edge_num;j++)
+                {
+                    if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
+                    {
+                        record_result(a[j][3]);
+                    }
+                }
+            }
+        }
+        
+        for(i=num_node-1; i>=0; i--)
+        {
+            free(node_info[i]);
+        }
+        for (i = edge_num-1;i>=0;i--)
+        {
+            free(a[i]);
+        }
+        free(a);	
     }
-    
-	for(i=num_node-1; i>=0; i--)
-	{
-		free(node_info[i]);
-	}
-	for (i = edge_num-1;i>=0;i--)
-	{
-		free(a[i]);
-	}
-	free(a);	
-	
-	
+       
 }
 
 int calculate_score(node *&A, info_node *&B)
@@ -491,5 +578,6 @@ int judge(int nummust,int mustarr[50],int test)//输入必经点点数，必经�
 	}
 	return 0;
 }
+
 
 
