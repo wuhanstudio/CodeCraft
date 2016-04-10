@@ -17,7 +17,7 @@ extern int end_node;//终点
 extern int num_node;//点的总数
 
 extern double x1,x2;
- const int re_compare_num=100;//记忆库的容量
+const int re_compare_num=100;//记忆库的容量
 extern int bestpath[600];//存储最好的路径
 
 typedef struct re_strc
@@ -54,7 +54,7 @@ int re_calculate_score(re_node *&A, re_info_node *&B)
 {
 	//double E;
 	double low=x1*100.0,high=-1*x1*100.0;
-	int l;
+	int l = 0;
 	
 	for(int i=re_compare_num-1; i>=0 ; i--)
 	{
