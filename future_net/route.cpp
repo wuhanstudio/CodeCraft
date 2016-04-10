@@ -17,28 +17,23 @@
 #include <algorithm>
 #include <sys/timeb.h>
 
-int split(char dst[][15], char* str, const char* spl);
-int read_demand(char *demand,int must[],int &startnode,int &endnode);//demand是输入的condition，must[50]是必经节点数组，startnode返回起点序号，endnode返回终点的序号，函数返回必经点的点数
-int feasible_childnode(int **&A,int j,int arr[2][10],int num,int path[]);//找到第i个节点的可行子节点 ,A是二维路径权重矩阵，i是父节点序号，arr[0][10]存储子节点的序号,arr[1][10]存储对应子节点的权重，k存储可行子节点数目，path是已走过的路径，num是已走过路径的点数
-int judge(int nummust,int mustarr[50],int test);//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
-int sec(time_t &G);//返回当前的秒数
-int time_used(time_t &H);//返回以用的时间
-void create();
-int **a;//边的矩阵
-int edgenum;//边的条数
-int num_must;//必经点点数
-int must_arr[50];//必经点集合
-int start_node;//起始点
-int end_node;//终点
-int num_node;//点的总数
+
+
+ int **a;//边的矩阵
+ int bestpow=-1;//最好路径的权重
+ int bestnum;//最好的路径的边数
+ int edgenum;//边的条数
+ int num_must;//必经点点数
+ int must_arr[50];//必经点集合
+ int start_node;//起始点
+ int end_node;//终点
+ int num_node;//点的总数
+ double x1=500.0,x2=1.0;
 int bestpath[600];//存储最好的路径
-int bestpow=-1;//最好路径的权重
-int bestnum;//最好的路径的点数
 
 const int compare_num=30;//每个点路径信息最大存储数，用于比较
  int use_compare_num=compare_num;
 double rate=0.8;
-double x1=500,x2=4;//x1必经点数量权重，x2路径权值和的权重
 
 #define MaxNode 600
 
@@ -902,6 +897,10 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
         }
         //printf("\nCost=%lf,\n\n", best_path.cost);
     }
+    else  if(num_node>100&&num_node<=150)
+    {
+        re_search_route(topo,edge_num,condition);
+    }
     else
     {
         num_must = read_demand(condition,must_arr,start_node,end_node);
@@ -923,10 +922,11 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
         }
         else if(num_node<=150) //7
         {
-            use_compare_num=15;//每个点路径信息最大存储数，用于比较
-            rate=0.8;
-            x2=4;//x1必经点数量权重，x2路径权值和的权重
-            x1=300;
+            // use_compare_num=100;//每个点路径信息最大存储数，用于比较
+            // rate=0.8;
+            // x2=4;//x1必经点数量权重，x2路径权值和的权重
+            // x1=300;
+            
         }
         else if(num_node<=200) //8
         {
@@ -972,7 +972,7 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
                 node_info[i]->must_num[j]=0;
                 node_info[i]->sumpow[j]=12000;
             }
-        }	
+        }	        
         create();
         if(bestpow>-1)
         {
