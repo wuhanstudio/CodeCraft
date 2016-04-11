@@ -266,13 +266,13 @@ void re_search_route(char *graph[5000], int edge_num, char *condition)
 	}
 	num_node++;
 
-	for(i=num_node-1;i>=0;i--)
+	for(int i=num_node-1;i>=0;i--)
 	{
 		e2s[i]=(e2s_edge *)malloc(sizeof(e2s_edge));
 		e2s[i]->num=0;
 		e2s[i]->head=(feasible_father_edge *)malloc(sizeof(feasible_father_edge));
 	}
-	for (i = edge_num-1;i>=0;i--)
+	for (int i = edge_num-1;i>=0;i--)
 	{
 		
 		feasible_father_edge *c,*r;
@@ -288,7 +288,7 @@ void re_search_route(char *graph[5000], int edge_num, char *condition)
 		e2s[a[i][2]]->num++;
 	}
 
-	for(i=num_node-1; i>=0; i--)
+	for(int i=num_node-1; i>=0; i--)
 	{
 		re_node_info[i] = (re_info_node *)malloc(sizeof(re_info_node));
 		for(int j=re_compare_num-1;j>=0;j--)
@@ -304,16 +304,16 @@ void re_search_route(char *graph[5000], int edge_num, char *condition)
 		record_result(a[bestpath[o]][0]);
 	}
 	
-	for(i=num_node-1; i>=0; i--)
+	for(int i=num_node-1; i>=0; i--)
 	{
 		free(re_node_info[i]);
 	}
-	for(i=num_node-1; i>=0; i--)
+	for(int i=num_node-1; i>=0; i--)
 	{
 		free(e2s[i]->head);
 		free(e2s[i]);
 	}
-	for (i = edge_num-1;i>=0;i--)
+	for (int i = edge_num-1;i>=0;i--)
 	{
 		free(a[i]);
 	}

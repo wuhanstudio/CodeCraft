@@ -1,7 +1,7 @@
 #ifndef __ROUTE_H__
 #define __ROUTE_H__
 
-void search_route(char *topo[5000], char *graph[5000],int edge_num, char *condition);
+void search_route(char *graph[5000],int edge_num, char *condition,char *topo_file);
 int split(char dst[][15], char* str, const char* spl);
 int read_demand(char *demand,int must[],int &startnode,int &endnode);//demand是输入的condition，must[50]是必经节点数组，startnode返回起点序号，endnode返回终点的序号，函数返回必经点的点数
 void re_search_route(char *graph[5000], int edge_num, char *condition);

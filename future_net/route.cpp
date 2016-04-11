@@ -1,4 +1,5 @@
 #include "route.h"
+#include "lib_io.h"
 #include "lib_record.h"
 #include <stdio.h>
 #include <stdlib.h> 
@@ -283,21 +284,6 @@ void create()
 							bestnum = c->passnum;
 							bestpow = c->pow;
 							memcpy(bestpath, c->road ,bestnum * sizeof(int));
-                            if(num_node>550)
-                            {
-                                for (i = 0; i < bestnum-1; i++)
-                                {
-                                    for(int j=0;j<edgenum;j++)
-                                    {
-                                        if(a[j][0]==bestpath[i]&&a[j][1]==bestpath[i+1])
-                                        {
-                                            record_result(a[j][3]);
-                                        }
-                                    }
-                                }
-                                happy = true;
-                                break;
-                            }
 							// //printf("bestpow:%d path:",bestpow);
 							// for(int o=0;o<bestnum;o++)
 							// {
@@ -1055,7 +1041,7 @@ void pre_process(std::vector<adjlist> *adj_vec,int num_node, std::vector<int> Tu
 }
 
 //你要完成的功能总入口
-void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condition)
+void search_route(char *graph[5000],int edge_num, char *condition,char *topo_file)
 {
      edgenum=edge_num;
      a = (int **)malloc(sizeof(int *) * 5000);
@@ -1071,9 +1057,13 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
          num_node = a[i][1]> num_node?a[i][1]:num_node;
      }
      num_node=num_node+1;
-     if(num_node>100&&num_node<=150)
+     // 每根据边数选择合适的算法，每50边递增
+     if( (num_node>100&&num_node<=150) || (num_node>250&&num_node<=300) ) 
      {
+        char *topo[5000];
+        edge_num = read_file(topo, 5000, topo_file);
         re_search_route(topo,edge_num,condition);
+        release_buff(topo, edge_num);
      }
      else if(num_node<=550)
      {
@@ -1166,6 +1156,8 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
     }
     else
     {
+        char *topo[5000];
+        edge_num = read_file(topo, 5000, topo_file);
         num_node = 0;
         std::vector<adjlist> adj_vec = build_adjlist(topo, edge_num, &num_node);
 
@@ -1216,6 +1208,8 @@ void search_route(char *topo[5000],char * graph[5000], int edge_num, char *condi
 
         for (unsigned int i = 0; i < best_path.edg_name.size(); i++)
             record_result(best_path.edg_name[i]);    	
+        release_buff(topo, edge_num);
+        
     }
        
 }
