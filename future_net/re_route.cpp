@@ -17,7 +17,8 @@ extern int end_node;//终点
 extern int num_node;//点的总数
 
 extern double x1,x2;
-const int re_compare_num=100;//记忆库的容量
+const int re_compare_num=30;//记忆库的容量
+int re_use_compare_num = re_compare_num;
 extern int bestpath[600];//存储最好的路径
 
 typedef struct re_strc
@@ -56,7 +57,7 @@ int re_calculate_score(re_node *&A, re_info_node *&B)
 	double low=x1*100.0,high=-1*x1*100.0;
 	int l = 0;
 	
-	for(int i=re_compare_num-1; i>=0 ; i--)
+	for(int i=re_use_compare_num-1; i>=0 ; i--)
 	{
 		if(low > B->score[i])
 		{
@@ -231,8 +232,9 @@ void re_create()
 }
 
 //你要完成的功能总入口
-void re_search_route(char *graph[5000], int edge_num, char *condition)
+void re_search_route(char *graph[5000], int edge_num, char *condition,int compare)
 {
+    re_use_compare_num = compare;
     x1=500.0,x2=1.0; 
     bestpow=600*20;//最好路径的权重   
 	edgenum=edge_num;
@@ -291,7 +293,7 @@ void re_search_route(char *graph[5000], int edge_num, char *condition)
 	for(int i=num_node-1; i>=0; i--)
 	{
 		re_node_info[i] = (re_info_node *)malloc(sizeof(re_info_node));
-		for(int j=re_compare_num-1;j>=0;j--)
+		for(int j=re_use_compare_num-1;j>=0;j--)
 		{
 			re_node_info[i]->score[j]=-12000;
 		}

@@ -364,7 +364,7 @@ void create()
 
 /****蚂蚁算法****/
 #define MAXNODE 600
-#define ThresholdTime_ms 9400
+#define ThresholdTime_ms 9500
 #define ThresholdNode 10
 
 const double ALPHA = 1.0;           // 启发因子:信息素的重要程度
@@ -1058,19 +1058,22 @@ void search_route(char *graph[5000],int edge_num, char *condition,char *topo_fil
      }
      num_node=num_node+1;
      // 每根据边数选择合适的算法，每50边递增
-     if( (num_node>100&&num_node<=150) || (num_node>250&&num_node<=300) ) 
+     if ( (num_node>100&&num_node<=150) || (num_node>250&&num_node<=300) )
      {
         char *topo[5000];
         edge_num = read_file(topo, 5000, topo_file);
-        re_search_route(topo,edge_num,condition);
-        release_buff(topo, edge_num);
+        if (num_node>250&&num_node<=300) 
+            re_search_route(topo,edge_num,condition,30);
+        else
+            re_search_route(topo,edge_num,condition,10);
+        // release_buff(topo, edge_num);
      }
      else if(num_node<=550)
      {
         num_must = read_demand(condition,must_arr,start_node,end_node);    
         if(num_node<=20)   
         {
-            use_compare_num=25;
+            use_compare_num=15;
             rate=0.8;
             x2=4;
         }
