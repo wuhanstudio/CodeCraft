@@ -368,11 +368,11 @@ void create()
 #define ThresholdNode 10
 
 const double ALPHA = 1.0;           // 启发因子:信息素的重要程度
-const double BETA = 2;              // 期望因子:城市间距离的重要程度
-const double ROU = 0.89;            // 信息素残留参数
-const int ANT_COUNT = 20;           // 蚂蚁数量
+const double BETA = 2.5;              // 期望因子:城市间距离的重要程度
+const double ROU = 0.6;            // 信息素残留参数
+const int ANT_COUNT = 100;           // 蚂蚁数量
 const int IT_COUNT = 20000;         // 迭代的次数
-const double DBQ = 50.0;            // 信息素总量
+const double DBQ = 400;            // 信息素总量
 const double DB_MAX = 10e9;         // 10的9次方,这真的只是个标记而已
 
 int CITY_COUNT;                     // 城市的数量
