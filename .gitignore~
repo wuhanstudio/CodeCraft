@@ -1,4 +1,4 @@
 bin/
 build/
-*.csv
+lib/
 future_net.tar.gz
