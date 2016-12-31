@@ -63,18 +63,12 @@ int calculate_score(node *&A, info_node *&B)
 		C[i] = x1*B->must_num[i] - x2*B->sumpow[i];
 		if(low > C[i])
 		{
-			// #pragma omp critical
-			// {
-				low=C[i];
-				lowest=i;
-			// }
+			low=C[i];
+			lowest=i;
 		}
 		if(high < C[i])
 		{
-			// #pragma omp critical
-			// {
-				high = C[i];
-			// }
+			high = C[i];
 		}	
 	}
 	if(D<low)
@@ -125,6 +119,11 @@ void create(int pointnum,int num,int path[])
 	memcpy(c->road, path ,c->passnum * sizeof(int));
 
 	node *r,*m,*q;
+	
+	// next_loop
+	// loop       :real
+	// max_loop   
+	int max_loop = 1;
 	for(i=0;i<num_node;i++)
 	{
 		if(i==0) l->next=c;
@@ -138,12 +137,16 @@ void create(int pointnum,int num,int path[])
 		
 		if(time_used(T)>=1000)
 		{
-			printf("超时!最大深度%d:",r->passnum);
+			printf("Time out,max depth:%d:",r->passnum);
 			break;
 		}
 
-		while(r)
+		//int loop = 0;
+		int next_loop = 0;
+		for(int o=0;o<max_loop;o++)
 		{
+			//loop++; // loop count
+
 			q = r;
 			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
 			for(int j=0; j < k; j++)
@@ -166,7 +169,7 @@ void create(int pointnum,int num,int path[])
 							bestnum = c->passnum;
 							bestpow = c->pow;
 							memcpy(bestpath, c->road ,bestnum * sizeof(int));
-							printf("bestpow:%d\n",bestpow);
+							// printf("bestpow:%d\n",bestpow);
 						}
 					}
 					free(c);
@@ -193,6 +196,9 @@ void create(int pointnum,int num,int path[])
 					c->road[r->passnum]=arr[0][j];
 					m->next=c;
 					m=c;
+					
+					next_loop++;
+
 				}
 				else
 				{
@@ -216,7 +222,8 @@ void create(int pointnum,int num,int path[])
 					if(calculate_score(c, node_info[arr[0][j]])==1)
 					{
 						m->next=c;
-						m=c;				
+						m=c;
+						next_loop++;
 					}
 					else
 					{
@@ -228,6 +235,8 @@ void create(int pointnum,int num,int path[])
 			free(q);
 		}
 		m->next = NULL;
+		printf("[%d] %d:%d\n",i,max_loop,next_loop );
+		max_loop = next_loop;
 	}
 }
 
@@ -275,6 +284,8 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 
 	for (int i = 0; i < bestnum; i++)
 		record_result(bestpath[i]);
+	printf("Size of Node   : %ld\n",sizeof(node) );
+	printf("Size of Int    : %ld\n",sizeof(int) );
 }
 
 //分解字符串函数
