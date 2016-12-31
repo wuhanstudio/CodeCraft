@@ -57,8 +57,6 @@ int calculate_score(node *&A, info_node *&B)
 	double C[compare_num];
 	double D = x1*A->mustnum - x2*A->pow,low=x1*50.0,high=-1,E;
 	int lowest;
-	const int g_ncore = omp_get_num_procs(); //获取执行核的数量
-	#pragma omp parallel for num_threads(g_ncore)
 	for(int i=0;i < compare_num; i++)
 	{
 		C[i] = x1*B->must_num[i] - x2*B->sumpow[i];
@@ -97,6 +95,8 @@ int calculate_score(node *&A, info_node *&B)
 // path    : 已经经历过的点 
 void create(int pointnum,int num,int path[])
 {
+	const int g_ncore = omp_get_num_procs(); //获取执行核的数量
+	printf("Use Core : %d\n",g_ncore );
 	printf("Total Nodes Number:%d\n",num_node);
 
 	int i;
@@ -148,6 +148,7 @@ void create(int pointnum,int num,int path[])
 			r = r->next;
 		}
 
+		#pragma omp parallel for num_threads(g_ncore)
 		for(int o=0;o<max_loop;o++)
 		{
 			int arr[3][10];
@@ -170,10 +171,13 @@ void create(int pointnum,int num,int path[])
 					{
 						if((bestpow==-1)||(bestpow > (temp->pow)))
 						{
+							#pragma omp critical
+							{
 							bestnum = temp->passnum;
 							bestpow = temp->pow;
 							memcpy(bestpath, temp->road ,bestnum * sizeof(int));
-							// printf("bestpow:%d\n",bestpow);
+							//printf("bestpow:%d\n",bestpow);
+							}
 						}
 					}
 					free(temp);
@@ -198,9 +202,11 @@ void create(int pointnum,int num,int path[])
 					temp->pow=r_record[o]->pow+arr[1][j];
 					memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
 					temp->road[r_record[o]->passnum]=arr[0][j];
+					#pragma omp critical
+					{
 					m->next=temp;
 					m=temp;
-					
+					}
 					next_loop++;
 
 				}
@@ -225,8 +231,11 @@ void create(int pointnum,int num,int path[])
 					temp -> road[r_record[o]->passnum] = arr[0][j];
 					if(calculate_score(temp, node_info[arr[0][j]])==1)
 					{
+						#pragma omp critical
+						{
 						m->next=temp;
 						m=temp;
+						}
 						next_loop++;
 					}
 					else
@@ -237,7 +246,7 @@ void create(int pointnum,int num,int path[])
 			}
 		}
 		m->next = NULL;
-		printf("[%d] %d:%d\n",i,max_loop,next_loop );
+		//printf("[%d] %d:%d\n",i,max_loop,next_loop );
 		max_loop = next_loop;
 	}
 }
@@ -286,8 +295,8 @@ void search_route(char *graph[5000], int edge, char *condition)
 
 	for (int i = 0; i < bestnum; i++)
 		record_result(bestpath[i]);
-	printf("Size of Node   : %ld\n",sizeof(node) );
-	printf("Size of Int    : %ld\n",sizeof(int) );
+	//printf("Size of Node   : %ld\n",sizeof(node) );
+	//printf("Size of Int    : %ld\n",sizeof(int) );
 }
 
 //分解字符串函数
@@ -335,19 +344,18 @@ int read_demand(char *demand,int must[50],int &startnode,int &endnode)
 int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])
 {
 	int k=0;//可行子节点
-	int m;
 	for(int i=0;i<num_edge;i++)
 	{
 		if(j==A[i][0])
 		{
-			m = 0;
+			int	index = 0;
 			for(int n=0;n<num;n++)
 			{
 				if(A[i][1] != path[n])
 				{
-					m++;
+					index++;
 				}
-				if(m == num)
+				if(index == num)
 				{
 					arr[0][k]=A[i][1];
 					arr[1][k]=A[i][2];
