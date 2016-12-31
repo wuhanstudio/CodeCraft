@@ -108,22 +108,24 @@ void create(int pointnum,int num,int path[])
 		shortest[i]=12000;
 	}
 
-	node *c = (node *)malloc(sizeof(node));
 	node *h = (node *)malloc(sizeof(node));
 	node *l = (node *)malloc(sizeof(node));
-	c -> mustnum = 0;
-	c -> pow = 0;
-	c -> next = NULL;
-	c -> passnum = num;
-	c -> point = pointnum;
-	memcpy(c->road, path ,c->passnum * sizeof(int));
+
+	node *start = (node *)malloc(sizeof(node));
+	start -> mustnum = 0;
+	start -> pow = 0;
+	start -> next = NULL;
+	start -> passnum = num;
+	start -> point = pointnum;
+	memcpy(start->road, path ,start->passnum * sizeof(int));
+	l->next=start;
+	start = NULL;
+	free(start);
 
 	node *r,*m,*q;
-	
 	int max_loop = 1;
-	for(i=0;i<num_node;i++)
+	for(i=1;i<num_node;i++)
 	{
-		if(i==0) l->next=c;
 		
 		q=l;
 		l=h;
@@ -149,86 +151,87 @@ void create(int pointnum,int num,int path[])
 
 		for(int o=0;o<max_loop;o++)
 		{
+			node *temp;
 			int k = feasible_childnode(a,r_record[o]->point,arr,r_record[o]->passnum,r_record[o]->road);
 			for(int j=0; j < k; j++)
 			{
 				if(arr[0][j]==end_node)
 				{
-					c = (node *)malloc(sizeof(node));
-					c -> point   = arr[0][j];
-					c -> passnum = r_record[o]->passnum+1;
-					c -> pow     = r_record[o]->pow+arr[1][j];
-					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
-					c -> road[r_record[o]->passnum]=arr[0][j];
-                    c -> mustnum = r_record[o]->mustnum;
+					temp = (node *)malloc(sizeof(node));
+					temp -> point   = arr[0][j];
+					temp -> passnum = r_record[o]->passnum+1;
+					temp -> pow     = r_record[o]->pow+arr[1][j];
+					memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					temp -> road[r_record[o]->passnum]=arr[0][j];
+                    temp -> mustnum = r_record[o]->mustnum;
                     //判断路径是否符合条件
-					int estimate = (c->mustnum==num_must) ? 1 : 0;		
+					int estimate = (temp->mustnum==num_must) ? 1 : 0;		
 					if(estimate)
 					{
-						if((bestpow==-1)||(bestpow > (c->pow)))
+						if((bestpow==-1)||(bestpow > (temp->pow)))
 						{
-							bestnum = c->passnum;
-							bestpow = c->pow;
-							memcpy(bestpath, c->road ,bestnum * sizeof(int));
+							bestnum = temp->passnum;
+							bestpow = temp->pow;
+							memcpy(bestpath, temp->road ,bestnum * sizeof(int));
 							// printf("bestpow:%d\n",bestpow);
 						}
 					}
-					free(c);
+					free(temp);
 				}
 				else if( ( ( r_record[o]->pow + arr[1][j] ) < shortest[arr[0][j]] ) )
 				{
 					shortest[arr[0][j]] = r_record[o]->pow + arr[1][j];
-					c = (node *)malloc(sizeof(node));
+					temp = (node *)malloc(sizeof(node));
 					if(arr[2][j]==1)
 					{
-						c->mustnum = r_record[o]->mustnum + 1;
-						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
-						c->mustnode[r_record[o]->mustnum]=arr[0][j];
+						temp->mustnum = r_record[o]->mustnum + 1;
+						memcpy(temp->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						temp->mustnode[r_record[o]->mustnum]=arr[0][j];
 					}
 					else
 					{
-						c->mustnum = r_record[o]->mustnum;
-						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						temp->mustnum = r_record[o]->mustnum;
+						memcpy(temp->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
 					}
-					c->point=arr[0][j];
-					c->passnum=r_record[o]->passnum+1;
-					c->pow=r_record[o]->pow+arr[1][j];
-					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
-					c->road[r_record[o]->passnum]=arr[0][j];
-					m->next=c;
-					m=c;
+					temp->point=arr[0][j];
+					temp->passnum=r_record[o]->passnum+1;
+					temp->pow=r_record[o]->pow+arr[1][j];
+					memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					temp->road[r_record[o]->passnum]=arr[0][j];
+					m->next=temp;
+					m=temp;
 					
 					next_loop++;
 
 				}
 				else
 				{
-					c = (node *)malloc(sizeof(node));
+					temp = (node *)malloc(sizeof(node));
 					if(arr[2][j]==1)
 					{
-						c->mustnum = r_record[o]->mustnum + 1;
-						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
-						c->mustnode[r_record[o]->mustnum]=arr[0][j];
+						temp->mustnum = r_record[o]->mustnum + 1;
+						memcpy(temp->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						temp->mustnode[r_record[o]->mustnum]=arr[0][j];
 					}
 					else
 					{
-						c->mustnum = r_record[o]->mustnum;
-						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						temp->mustnum = r_record[o]->mustnum;
+						memcpy(temp->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
 					}
-					c -> point   = arr[0][j];
-					c -> passnum = r_record[o]->passnum+1;
-					c -> pow     = r_record[o]->pow+arr[1][j];
-					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
-					c -> road[r_record[o]->passnum] = arr[0][j];
-					if(calculate_score(c, node_info[arr[0][j]])==1)
+					temp -> point   = arr[0][j];
+					temp -> passnum = r_record[o]->passnum+1;
+					temp -> pow     = r_record[o]->pow+arr[1][j];
+					memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					temp -> road[r_record[o]->passnum] = arr[0][j];
+					if(calculate_score(temp, node_info[arr[0][j]])==1)
 					{
-						m->next=c;
-						m=c;
+						m->next=temp;
+						m=temp;
 						next_loop++;
 					}
 					else
 					{
-						free(c);
+						free(temp);
 					}
 				}
 			}
