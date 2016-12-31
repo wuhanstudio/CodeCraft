@@ -100,7 +100,6 @@ void create(int pointnum,int num,int path[])
 	printf("Total Nodes Number:%d\n",num_node);
 
 	int i;
-	int arr[3][10];
 	
 	int shortest[600];
 	for(i=0;i<num_node;i++)
@@ -151,6 +150,7 @@ void create(int pointnum,int num,int path[])
 
 		for(int o=0;o<max_loop;o++)
 		{
+			int arr[3][10];
 			node *temp;
 			int k = feasible_childnode(a,r_record[o]->point,arr,r_record[o]->passnum,r_record[o]->road);
 			for(int j=0; j < k; j++)
