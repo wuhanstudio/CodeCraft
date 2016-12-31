@@ -2,27 +2,28 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h> 
+#include <omp.h>
 #include "route.h"
 #include "time.h"
 #include "lib_record.h"
-#include <omp.h>
+
 int split(char dst[][20], char* str, const char* spl);
-//demand是输入的condition，must[50]是必经节点数组，startnode返回起点序号，endnode返回终点的序号，函数返回必经点的点数
 int read_demand(char *demand,int must[],int &startnode,int &endnode);
-//找到第i个节点的可行子节点 ,A是二维路径权重矩阵，i是父节点序号，arr[0][10]存储子节点的序号,arr[1][10]存储对应子节点的权重，k存储可行子节点数目，path是已走过的路径，num是已走过路径的点数
 int feasible_childnode(int **&A,int j,int arr[2][10],int num,int path[]);
-//输入必经点点数，必经点数组，待测点的序号,待测点是必经点，为true否则为false
 int judge(int nummust,int mustarr[50],int test);
+
 int sec(time_t &G);//返回当前的秒数
 int time_used(time_t &H);//返回以用的时间
 
 int **a;//边的矩阵
-int edgenum;//边的条数
+int num_edge;//边的条数
+int num_node;//点的总数
 int num_must;//必经点点数
 int must_arr[50];//必经点集合
+
 int start_node;//起始点
 int end_node;//终点
-int num_node;//点的总数
+
 int bestpath[600];//存储最好的路径
 int bestpow=-1;//最好路径的权重
 int bestnum;//最好的路径的点数
@@ -99,7 +100,6 @@ void create(int pointnum,int num,int path[])
 	printf("Total Nodes Number:%d\n",num_node);
 
 	int i;
-	int k;
 	int arr[3][10];
 	
 	int shortest[600];
@@ -120,9 +120,6 @@ void create(int pointnum,int num,int path[])
 
 	node *r,*m,*q;
 	
-	// next_loop
-	// loop       :real
-	// max_loop   
 	int max_loop = 1;
 	for(i=0;i<num_node;i++)
 	{
@@ -141,25 +138,29 @@ void create(int pointnum,int num,int path[])
 			break;
 		}
 
-		//int loop = 0;
+		// Record Every Loop
 		int next_loop = 0;
+		node** r_record = (node**)malloc(sizeof(node*)*max_loop);
+		for (int o = 0; o < max_loop; ++o)
+		{
+			r_record[o] = r;
+			r = r->next;
+		}
+
 		for(int o=0;o<max_loop;o++)
 		{
-			//loop++; // loop count
-
-			q = r;
-			k = feasible_childnode(a,r->point,arr,r->passnum,r->road);
+			int k = feasible_childnode(a,r_record[o]->point,arr,r_record[o]->passnum,r_record[o]->road);
 			for(int j=0; j < k; j++)
 			{
 				if(arr[0][j]==end_node)
 				{
 					c = (node *)malloc(sizeof(node));
 					c -> point   = arr[0][j];
-					c -> passnum = r->passnum+1;
-					c -> pow     = r->pow+arr[1][j];
-					memcpy(c->road, r->road ,r->passnum * sizeof(int));
-					c -> road[r->passnum]=arr[0][j];
-                    c -> mustnum = r->mustnum;
+					c -> passnum = r_record[o]->passnum+1;
+					c -> pow     = r_record[o]->pow+arr[1][j];
+					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					c -> road[r_record[o]->passnum]=arr[0][j];
+                    c -> mustnum = r_record[o]->mustnum;
                     //判断路径是否符合条件
 					int estimate = (c->mustnum==num_must) ? 1 : 0;		
 					if(estimate)
@@ -174,26 +175,26 @@ void create(int pointnum,int num,int path[])
 					}
 					free(c);
 				}
-				else if( ( ( r->pow + arr[1][j] ) < shortest[arr[0][j]] ) )
+				else if( ( ( r_record[o]->pow + arr[1][j] ) < shortest[arr[0][j]] ) )
 				{
-					shortest[arr[0][j]] = r->pow + arr[1][j];
+					shortest[arr[0][j]] = r_record[o]->pow + arr[1][j];
 					c = (node *)malloc(sizeof(node));
 					if(arr[2][j]==1)
 					{
-						c->mustnum = r->mustnum + 1;
-						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
-						c->mustnode[r->mustnum]=arr[0][j];
+						c->mustnum = r_record[o]->mustnum + 1;
+						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						c->mustnode[r_record[o]->mustnum]=arr[0][j];
 					}
 					else
 					{
-						c->mustnum = r->mustnum;
-						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+						c->mustnum = r_record[o]->mustnum;
+						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
 					}
 					c->point=arr[0][j];
-					c->passnum=r->passnum+1;
-					c->pow=r->pow+arr[1][j];
-					memcpy(c->road, r->road ,r->passnum * sizeof(int));
-					c->road[r->passnum]=arr[0][j];
+					c->passnum=r_record[o]->passnum+1;
+					c->pow=r_record[o]->pow+arr[1][j];
+					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					c->road[r_record[o]->passnum]=arr[0][j];
 					m->next=c;
 					m=c;
 					
@@ -205,20 +206,20 @@ void create(int pointnum,int num,int path[])
 					c = (node *)malloc(sizeof(node));
 					if(arr[2][j]==1)
 					{
-						c->mustnum = r->mustnum + 1;
-						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
-						c->mustnode[r->mustnum]=arr[0][j];
+						c->mustnum = r_record[o]->mustnum + 1;
+						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
+						c->mustnode[r_record[o]->mustnum]=arr[0][j];
 					}
 					else
 					{
-						c->mustnum = r->mustnum;
-						memcpy(c->mustnode, r->mustnode, r->mustnum * sizeof(int));
+						c->mustnum = r_record[o]->mustnum;
+						memcpy(c->mustnode, r_record[o]->mustnode, r_record[o]->mustnum * sizeof(int));
 					}
 					c -> point   = arr[0][j];
-					c -> passnum = r->passnum+1;
-					c -> pow     = r->pow+arr[1][j];
-					memcpy(c->road, r->road ,r->passnum * sizeof(int));
-					c -> road[r->passnum] = arr[0][j];
+					c -> passnum = r_record[o]->passnum+1;
+					c -> pow     = r_record[o]->pow+arr[1][j];
+					memcpy(c->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
+					c -> road[r_record[o]->passnum] = arr[0][j];
 					if(calculate_score(c, node_info[arr[0][j]])==1)
 					{
 						m->next=c;
@@ -231,8 +232,6 @@ void create(int pointnum,int num,int path[])
 					}
 				}
 			}
-			r = r->next;
-			free(q);
 		}
 		m->next = NULL;
 		printf("[%d] %d:%d\n",i,max_loop,next_loop );
@@ -240,10 +239,10 @@ void create(int pointnum,int num,int path[])
 	}
 }
 
-void search_route(char *graph[5000], int edge_num, char *condition)
+void search_route(char *graph[5000], int edge, char *condition)
 {
 	start_time=sec(T);
-	edgenum=edge_num;
+	num_edge=edge;
 	a = (int **)malloc(sizeof(int *) * 5000);
 	int i=0;
 	while (graph[i])
@@ -261,7 +260,7 @@ void search_route(char *graph[5000], int edge_num, char *condition)
 	}
 
 	// Total Nodes
-	num_node=a[edge_num-1][0]+1;
+	num_node=a[edge-1][0]+1;
 	num_must = read_demand(condition,must_arr,start_node,end_node);
 	for(i=0; i<num_node; i++)
 	{
@@ -334,7 +333,7 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])
 {
 	int k=0;//可行子节点
 	int m;
-	for(int i=0;i<edgenum;i++)
+	for(int i=0;i<num_edge;i++)
 	{
 		if(j==A[i][0])
 		{
@@ -354,7 +353,7 @@ int feasible_childnode(int **&A,int j,int arr[3][10],int num,int path[])
 				}
 			}
 		}
-		// if(((i + 1) >= edgenum)||(((i == A[i][0]) && (i != A[i+1][0]))))
+		// if(((i + 1) >= num_edge)||(((i == A[i][0]) && (i != A[i+1][0]))))
 		// {
 		// 	break;
 		// }
