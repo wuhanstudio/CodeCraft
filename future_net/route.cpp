@@ -121,16 +121,13 @@ void create(int pointnum,int num,int path[])
 	start = NULL;
 	free(start);
 
-	node *r,*m,*q;
+	node *r,*m;
 	int max_loop = 1;
 	for(i=1;i<num_node;i++)
 	{
-		
-		q=l;
-		l=h;
-		h=q;
-
+		h=l;
 		r = h->next;
+		l = (node *)malloc(sizeof(node));
 		m = l;
 		
 		if(time_used(T)>=1000)
