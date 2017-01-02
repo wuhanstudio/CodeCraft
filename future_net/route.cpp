@@ -4,16 +4,12 @@
 #include <stdlib.h> 
 #include <omp.h>
 #include "route.h"
-#include "time.h"
 #include "lib_record.h"
 
 int split(char dst[][20], char* str, const char* spl);
 int read_demand(char *demand,int must[],int &startnode,int &endnode);
 int feasible_childnode(int **&A,int j,int arr[2][10],int num,int path[]);
 int judge(int nummust,int mustarr[50],int test);
-
-int sec(time_t &G);//返回当前的秒数
-int time_used(time_t &H);//返回以用的时间
 
 int **a;//边的矩阵
 int num_edge;//边的条数
@@ -27,8 +23,6 @@ int end_node;//终点
 int bestpath[600];//存储最好的路径
 int bestpow=-1;//最好路径的权重
 int bestnum;//最好的路径的点数
-int start_time;//开始时间
-time_t T;//计时用的结构体
 
 const int compare_num=15;//每个点路径信息最大存储数，用于比较
 double rate=0.7;
@@ -99,15 +93,13 @@ void create(int pointnum,int num,int path[])
 	printf("Use Core : %d\n",g_ncore );
 	printf("Total Nodes Number:%d\n",num_node);
 
-	int i;
-	
 	int shortest[600];
-	for(i=0;i<num_node;i++)
+	for(int i=0;i<num_node;i++)
 	{
 		shortest[i]=12000;
 	}
 
-	node *h = (node *)malloc(sizeof(node));
+	node *h;
 	node *l = (node *)malloc(sizeof(node));
 
 	node *start = (node *)malloc(sizeof(node));
@@ -123,9 +115,9 @@ void create(int pointnum,int num,int path[])
 
 	node *r;
 	int max_loop = 1;
-	for(i=1;i<num_node;i++)
+	for(int i=1;i<num_node;i++)
 	{
-		printf("Depth:%d#%d\n",i,max_loop );
+		//printf("Depth:%d#%d\n",i,max_loop );
 		h=l;
 		r = h->next;
 		l = (node *)malloc(sizeof(node));
@@ -133,18 +125,12 @@ void create(int pointnum,int num,int path[])
 		int next_loop = 0;
 		if(max_loop>0)
 		{
-			node**   end_loop = (node**)malloc(sizeof(node*)*max_loop);
-			node** start_loop = (node**)malloc(sizeof(node*)*max_loop);
-			for (int o = 0; o < max_loop; ++o)
+			node**   end_loop = (node**)malloc(sizeof(node*)*g_ncore);
+			node** start_loop = (node**)malloc(sizeof(node*)*g_ncore);
+			for (int o = 0; o < g_ncore; ++o)
 			{
 				start_loop[o] = (node*)malloc(sizeof(node));
-				  end_loop[o] = (node*)malloc(sizeof(node));
 				start_loop[o]->next = NULL;
-			}
-			if(time_used(T)>=1000)
-			{
-				printf("Time out,max depth:%d:",r->passnum);
-				break;
 			}
 			node** r_record = (node**)malloc(sizeof(node*)*max_loop);
 			for (int o = 0; o < max_loop; ++o)
@@ -152,8 +138,7 @@ void create(int pointnum,int num,int path[])
 				r_record[o] = r;
 				r = r->next;
 			}
-
-			//#pragma omp parallel for num_threads(g_ncore)
+			#pragma omp parallel for num_threads(g_ncore)
 			for(int o=0;o<max_loop;o++)
 			{
 				int arr[3][10];
@@ -176,13 +161,13 @@ void create(int pointnum,int num,int path[])
 						{
 							if((bestpow==-1)||(bestpow > (temp->pow)))
 							{
-								//#pragma omp critical
-								//{
+								#pragma omp critical
+								{
 								bestnum = temp->passnum;
 								bestpow = temp->pow;
 								memcpy(bestpath, temp->road ,bestnum * sizeof(int));
 								//printf("bestpow:%d\n",bestpow);
-								//}
+								}
 							}
 						}
 						free(temp);
@@ -208,16 +193,16 @@ void create(int pointnum,int num,int path[])
 						memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
 						temp->road[r_record[o]->passnum]=arr[0][j];
 						
-						if(start_loop[o]->next==NULL)
+						if(start_loop[omp_get_thread_num()]->next==NULL)
 						{
-							start_loop[o]->next = temp;
+							start_loop[omp_get_thread_num()]->next = temp;
 						}
 						else
 						{
-							end_loop[o]->next = temp;
+							end_loop[omp_get_thread_num()]->next = temp;
 						}
-						end_loop[o] = temp;
-						//printf("%d ",end_loop[o]->point );
+						end_loop[omp_get_thread_num()] = temp;
+						//printf("%d ",end_loop[omp_get_thread_num()]->point );
 						next_loop++;
 
 					}
@@ -242,16 +227,16 @@ void create(int pointnum,int num,int path[])
 						temp -> road[r_record[o]->passnum] = arr[0][j];
 						if(calculate_score(temp, node_info[arr[0][j]])==1)
 						{
-							if(start_loop[o]->next==NULL)
+							if(start_loop[omp_get_thread_num()]->next==NULL)
 							{
-								start_loop[o]->next = temp;
+								start_loop[omp_get_thread_num()]->next = temp;
 							}
 							else
 							{
-								end_loop[o]->next = temp;
+								end_loop[omp_get_thread_num()]->next = temp;
 							}
-							end_loop[o] = temp;
-							printf("%d ",end_loop[o]->point );
+							end_loop[omp_get_thread_num()] = temp;
+							//printf("%d ",end_loop[omp_get_thread_num()]->point );
 							next_loop++;
 						}
 						else
@@ -262,9 +247,10 @@ void create(int pointnum,int num,int path[])
 				}
 			}
 			node* m = l;
-			printf("\n");
-			for (int o = 0; o < max_loop; ++o)
+			//printf("\n");
+			for (int o = 0; o < g_ncore; ++o)
 			{
+				//printf("%d\n",o );
 				if(start_loop[o]->next!=NULL)
 				{
 					while(start_loop[o]->next!=NULL)
@@ -276,16 +262,6 @@ void create(int pointnum,int num,int path[])
 					}
 				}
 			}
-			printf("\n");
-			for (int o = 0; o < max_loop; ++o)
-			{
-				start_loop[o] = NULL;
-				end_loop[o] = NULL;
-				free(start_loop[o]);
-				free(end_loop[o]);
-			}
-			free(start_loop);
-			free(end_loop);
 		}
 
 		max_loop = next_loop;
@@ -294,7 +270,6 @@ void create(int pointnum,int num,int path[])
 
 void search_route(char *graph[5000], int edge, char *condition)
 {
-	start_time=sec(T);
 	num_edge=edge;
 	a = (int **)malloc(sizeof(int *) * 5000);
 	int i=0;
@@ -421,17 +396,4 @@ int judge(int nummust,int mustarr[50],int test)
 		}
 	}
 	return 0;
-}
-
-int sec(time_t &G)
-{
-	time(&G);
-	struct tm *TT;
-	TT=localtime(&G);
-	return TT->tm_sec+60*TT->tm_min+3600*TT->tm_hour;
-}
-
-int time_used(time_t &H)
-{
-	return (sec(H)-start_time);
 }
