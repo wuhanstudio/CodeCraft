@@ -117,10 +117,10 @@ void create(int pointnum,int num,int path[])
 	int max_loop = 1;
 	for(int i=1;i<num_node;i++)
 	{
-		//printf("Depth:%d#%d\n",i,max_loop );
+		printf("Depth:%d#%d\n",i,max_loop );
 		h=l;
 		r = h->next;
-		l = (node *)malloc(sizeof(node));
+		//l = h;
 		// Record Every Loop
 		int next_loop = 0;
 		if(max_loop>0)
@@ -202,7 +202,7 @@ void create(int pointnum,int num,int path[])
 							end_loop[omp_get_thread_num()]->next = temp;
 						}
 						end_loop[omp_get_thread_num()] = temp;
-						//printf("%d ",end_loop[omp_get_thread_num()]->point );
+						printf("%d ",end_loop[omp_get_thread_num()]->point );
 						next_loop++;
 
 					}
@@ -236,7 +236,7 @@ void create(int pointnum,int num,int path[])
 								end_loop[omp_get_thread_num()]->next = temp;
 							}
 							end_loop[omp_get_thread_num()] = temp;
-							//printf("%d ",end_loop[omp_get_thread_num()]->point );
+							printf("%d ",end_loop[omp_get_thread_num()]->point );
 							next_loop++;
 						}
 						else
@@ -247,25 +247,29 @@ void create(int pointnum,int num,int path[])
 				}
 			}
 			node* m = l;
-			//printf("\n");
+			printf("\n");
 			for (int o = 0; o < g_ncore; ++o)
 			{
-				//printf("%d\n",o );
 				if(start_loop[o]->next!=NULL)
 				{
-					while(start_loop[o]->next!=NULL)
+					m->next = start_loop[o];
+					m = m->next;
+					while(m->next!=NULL)
 					{
-						//printf("%d-",start_loop[o]->next->point );
-						m -> next = start_loop[o]->next;
+						printf("%d-",m->next->point );
 						m = m->next;
-						start_loop[o] = start_loop[o]->next;
 					}
 				}
+				//	start_loop[o]->next = NULL;
 			}
+			free(r_record);	
+			free(end_loop);
+			printf("\n");
 		}
 
 		max_loop = next_loop;
 	}
+	free(l);
 }
 
 void search_route(char *graph[5000], int edge, char *condition)
