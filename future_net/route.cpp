@@ -111,15 +111,11 @@ void create(int pointnum,int num,int path[])
 	memcpy(start->road, path ,start->passnum * sizeof(int));
 	l->next=start;
 
-	node *r;
 	int max_loop = 1;
 	for(int i=1;i<num_node;i++)
 	{
-		//printf("Depth:%d#%d\n",i,max_loop );
-		h=l;
-		r = h->next;
-		//l = h;
-		// Record Every Loop
+		printf("Depth:%d#%d\n",i,max_loop );
+		h=l->next;
 		int next_loop = 0;
 		if(max_loop>0)
 		{
@@ -133,8 +129,8 @@ void create(int pointnum,int num,int path[])
 			node** r_record = (node**)malloc(sizeof(node*)*max_loop);
 			for (int o = 0; o < max_loop; ++o)
 			{
-				r_record[o] = r;
-				r = r->next;
+				r_record[o] = h;
+				h = h->next;
 				r_record[o] -> next = NULL;
 			}
 			#pragma omp parallel for num_threads(g_ncore)
@@ -200,7 +196,7 @@ void create(int pointnum,int num,int path[])
 							end_loop[omp_get_thread_num()]->next = temp;
 						}
 						end_loop[omp_get_thread_num()] = temp;
-						//printf("%d ",end_loop[omp_get_thread_num()]->point );
+						printf("%d ",end_loop[omp_get_thread_num()]->point );
 						next_loop++;
 
 					}
@@ -234,7 +230,7 @@ void create(int pointnum,int num,int path[])
 								end_loop[omp_get_thread_num()]->next = temp;
 							}
 							end_loop[omp_get_thread_num()] = temp;
-							//printf("%d ",end_loop[omp_get_thread_num()]->point );
+							printf("%d ",end_loop[omp_get_thread_num()]->point );
 							next_loop++;
 						}
 						else
@@ -245,16 +241,15 @@ void create(int pointnum,int num,int path[])
 				}
 			}
 			node* m = l;
-			//printf("\n");
+			printf("\n");
 			for (int o = 0; o < g_ncore; ++o)
 			{
 				if(start_loop[o]->next!=NULL)
 				{
 					m->next = start_loop[o]->next;
-					m = m->next;
 					while(m->next!=NULL)
 					{
-						//printf("%d-",m->next->point );
+						printf("%d-",m->next->point );
 						m = m->next;
 					}
 				}
@@ -264,7 +259,7 @@ void create(int pointnum,int num,int path[])
 			free(end_loop);
 			free(r_record);	
 			free(start_loop);
-			//printf("\n");
+			printf("\n");
 		}
 
 		max_loop = next_loop;
