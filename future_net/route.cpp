@@ -4,7 +4,7 @@
 #include <stdlib.h> 
 #include <omp.h>
 #include "route.h"
-#include "lib_record.h"
+#include "lib/lib_record.h"
 
 int split(char dst[][20], char* str, const char* spl);
 int read_demand(char *demand,int must[],int &startnode,int &endnode);
@@ -256,9 +256,13 @@ void create(int pointnum,int num,int path[])
 				start_loop[o]->next = NULL;
 				free(start_loop[o]);
 			}
-			free(end_loop);
-			free(r_record);	
 			free(start_loop);
+			free(end_loop);
+            // There is a free, there is a segmenttation fault
+            //for (int o = 0; o < max_loop; ++o) {
+            //    free(r_record[o]);
+            //}
+			free(r_record);
 			printf("\n");
 		}
 

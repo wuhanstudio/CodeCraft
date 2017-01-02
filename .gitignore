@@ -1,7 +1,9 @@
 bin/
 build/
 dest09/
-testcase/
+.idea/
+test-case/
+cmake-build-debug/
 *.csv
 future_net.tar.gz
 
