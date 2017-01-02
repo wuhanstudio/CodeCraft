@@ -91,7 +91,7 @@ void create(int pointnum,int num,int path[])
 {
 	const int g_ncore = omp_get_num_procs(); //获取执行核的数量
 	printf("Use Core : %d\n",g_ncore );
-	printf("Total Nodes Number:%d\n",num_node);
+	//printf("Total Nodes Number:%d\n",num_node);
 
 	int shortest[600];
 	for(int i=0;i<num_node;i++)
@@ -110,14 +110,12 @@ void create(int pointnum,int num,int path[])
 	start -> point = pointnum;
 	memcpy(start->road, path ,start->passnum * sizeof(int));
 	l->next=start;
-	start = NULL;
-	free(start);
 
 	node *r;
 	int max_loop = 1;
 	for(int i=1;i<num_node;i++)
 	{
-		printf("Depth:%d#%d\n",i,max_loop );
+		//printf("Depth:%d#%d\n",i,max_loop );
 		h=l;
 		r = h->next;
 		//l = h;
@@ -137,6 +135,7 @@ void create(int pointnum,int num,int path[])
 			{
 				r_record[o] = r;
 				r = r->next;
+				r_record[o] -> next = NULL;
 			}
 			#pragma omp parallel for num_threads(g_ncore)
 			for(int o=0;o<max_loop;o++)
@@ -192,7 +191,6 @@ void create(int pointnum,int num,int path[])
 						temp->pow=r_record[o]->pow+arr[1][j];
 						memcpy(temp->road, r_record[o]->road ,r_record[o]->passnum * sizeof(int));
 						temp->road[r_record[o]->passnum]=arr[0][j];
-						
 						if(start_loop[omp_get_thread_num()]->next==NULL)
 						{
 							start_loop[omp_get_thread_num()]->next = temp;
@@ -202,7 +200,7 @@ void create(int pointnum,int num,int path[])
 							end_loop[omp_get_thread_num()]->next = temp;
 						}
 						end_loop[omp_get_thread_num()] = temp;
-						printf("%d ",end_loop[omp_get_thread_num()]->point );
+						//printf("%d ",end_loop[omp_get_thread_num()]->point );
 						next_loop++;
 
 					}
@@ -236,7 +234,7 @@ void create(int pointnum,int num,int path[])
 								end_loop[omp_get_thread_num()]->next = temp;
 							}
 							end_loop[omp_get_thread_num()] = temp;
-							printf("%d ",end_loop[omp_get_thread_num()]->point );
+							//printf("%d ",end_loop[omp_get_thread_num()]->point );
 							next_loop++;
 						}
 						else
@@ -247,28 +245,31 @@ void create(int pointnum,int num,int path[])
 				}
 			}
 			node* m = l;
-			printf("\n");
+			//printf("\n");
 			for (int o = 0; o < g_ncore; ++o)
 			{
 				if(start_loop[o]->next!=NULL)
 				{
-					m->next = start_loop[o];
+					m->next = start_loop[o]->next;
 					m = m->next;
 					while(m->next!=NULL)
 					{
-						printf("%d-",m->next->point );
+						//printf("%d-",m->next->point );
 						m = m->next;
 					}
 				}
-				//	start_loop[o]->next = NULL;
+				start_loop[o]->next = NULL;
+				free(start_loop[o]);
 			}
-			free(r_record);	
 			free(end_loop);
-			printf("\n");
+			free(r_record);	
+			free(start_loop);
+			//printf("\n");
 		}
 
 		max_loop = next_loop;
 	}
+	l->next = NULL;
 	free(l);
 }
 
@@ -304,8 +305,8 @@ void search_route(char *graph[5000], int edge, char *condition)
 	
 	int PATH[num_node];
 	PATH[0]=start_node;
-	printf("Size of Node   : %ld\n",sizeof(node) );
-	printf("Start Node : %d\n",start_node );
+	//printf("Size of Node   : %ld\n",sizeof(node) );
+	//printf("Start Node : %d\n",start_node );
 	
 	create(start_node,1,PATH);
 
